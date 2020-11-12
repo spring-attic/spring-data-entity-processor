@@ -1,0 +1,15 @@
+target/
+.settings/
+.project
+.classpath
+*.orig
+.springBeans
+.factorypath
+.sts4-cache
+*.sonar4clipse*
+.DS_Store
+*.iml
+*.ipr
+*.iws
+/.idea/
+*.graphml
