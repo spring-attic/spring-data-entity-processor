@@ -35,5 +35,6 @@ public class DataComponentProcessorUnitTests {
 		DataModelFileWriter fileWriter = new DataModelFileWriter(modelGenerator.process());
 		fileWriter.processFiles();
 		fileWriter.writeTo(null);
+		fileWriter.writeSubstitution(null);
 	}
 }

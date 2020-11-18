@@ -19,7 +19,6 @@ import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,18 +26,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
+import com.squareup.javapoet.WildcardTypeName;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.PropertyModel.ListPropertyModel;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mapping.model.DomainTypeConstructor;
 import org.springframework.data.mapping.model.DomainTypeInformation;
 import org.springframework.data.mapping.model.Field;
+import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -78,6 +83,51 @@ public class DataModelFileWriter {
 			} else {
 				file.writeTo(directory);
 			}
+		}
+	}
+
+	void writeSubstitution(@Nullable File directory) throws IOException {
+
+		TypeName wildcard = WildcardTypeName.subtypeOf(Object.class);
+
+		ParameterizedTypeName mapKeyType = ParameterizedTypeName.get(ClassName.get(Class.class), wildcard);
+		ParameterizedTypeName mapValueType = ParameterizedTypeName.get(ClassName.get(ClassTypeInformation.class), wildcard);
+
+		ParameterizedTypeName cacheType = ParameterizedTypeName.get(ClassName.get(Map.class), mapKeyType, mapValueType);
+
+		Builder fromMethod = MethodSpec.methodBuilder("from")
+				.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+				.addAnnotation(ClassName.get("com.oracle.svm.core.annotate", "Substitute"))
+				.addTypeVariable(TypeVariableName.get("S"))
+				.returns(ParameterizedTypeName.get(ClassName.get(ClassTypeInformation.class), TypeVariableName.get("S")))
+				.addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), TypeVariableName.get("S")), "type");
+
+		fromMethod.addStatement("System.out.println(\"hello from substitution!\")");
+
+		for (JavaFileBuilder fileBuilder : fileBuilders.values()) {
+
+			fromMethod.beginControlFlow("if(type == " + fileBuilder.typeModel.getTypeName() + ".class)");
+			fromMethod.addStatement("return (org.springframework.data.util.ClassTypeInformation<S>) " + fileBuilder.generatedTypeName + ".instance()");
+			fromMethod.endControlFlow();
+		}
+
+		fromMethod.addStatement("return (org.springframework.data.util.ClassTypeInformation<S>) cache.computeIfAbsent(type, org.springframework.data.util.ClassTypeInformation::new)");
+
+		TypeSpec typeSpec = TypeSpec.classBuilder("Target_ClassTypeInformation")
+				.addModifiers(Modifier.PUBLIC)
+				.addAnnotation(AnnotationSpec.builder(ClassName.get("com.oracle.svm.core.annotate", "TargetClass"))
+						.addMember("className", "$S", "org.springframework.data.util.ClassTypeInformation")
+//						.addMember("onlyWith", "{ $T.class }", ClassName.get("org.springframework.graalvm.substitutions", "OnlyIfPresent"))
+						.build())
+				.addField(FieldSpec.builder(cacheType, "cache", Modifier.PRIVATE, Modifier.STATIC).addAnnotation(ClassName.get("com.oracle.svm.core.annotate", "Alias")).build())
+				.addMethod(fromMethod.build())
+				.build();
+		JavaFile file = JavaFile.builder("org.springframework.data.util", typeSpec).build();
+
+		if (directory == null) {
+			System.out.println(file.toString());
+		} else {
+			file.writeTo(directory);
 		}
 	}
 

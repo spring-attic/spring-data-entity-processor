@@ -50,6 +50,7 @@ public class CodeGeneratorApplication {
 		fileWriter.processFiles();
 		try {
 			fileWriter.writeTo(outputDirectory);
+			fileWriter.writeSubstitution(outputDirectory);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
