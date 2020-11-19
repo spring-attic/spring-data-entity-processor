@@ -16,6 +16,7 @@
 package org.springframework.data.example.repo;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -34,6 +35,8 @@ public class Person {
 	private final String lastname;
 	private Address address;
 	private List<Address> addressList;
+	private Map<String, String> phoneNumbers;
+	private Map<String, Email> emailAddresses;
 
 	public Person(String firstname, String lastname) {
 		this(null, firstname, lastname, null);
@@ -82,5 +85,21 @@ public class Person {
 
 	public void setAddressList(List<Address> addressList) {
 		this.addressList = addressList;
+	}
+
+	public Map<String, String> getPhoneNumbers() {
+		return phoneNumbers;
+	}
+
+	public void setPhoneNumbers(Map<String, String> phoneNumbers) {
+		this.phoneNumbers = phoneNumbers;
+	}
+
+	public Map<String, Email> getEmailAddresses() {
+		return emailAddresses;
+	}
+
+	public void setEmailAddresses(Map<String, Email> emailAddresses) {
+		this.emailAddresses = emailAddresses;
 	}
 }

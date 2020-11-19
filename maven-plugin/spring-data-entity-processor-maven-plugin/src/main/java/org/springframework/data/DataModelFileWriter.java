@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import com.squareup.javapoet.AnnotationSpec;
@@ -39,10 +40,12 @@ import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.PropertyModel.ListPropertyModel;
+import org.springframework.data.PropertyModel.MapPropertyModel;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mapping.model.DomainTypeConstructor;
-import org.springframework.data.mapping.model.DomainTypeInformation;
+import org.springframework.data.mapping.model.ConfigurableTypeConstructor;
+import org.springframework.data.mapping.model.ConfigurableTypeInformation;
 import org.springframework.data.mapping.model.Field;
+import org.springframework.data.mapping.model.SimpleConfiguredTypes;
 import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -117,7 +120,7 @@ public class DataModelFileWriter {
 				.addModifiers(Modifier.PUBLIC)
 				.addAnnotation(AnnotationSpec.builder(ClassName.get("com.oracle.svm.core.annotate", "TargetClass"))
 						.addMember("className", "$S", "org.springframework.data.util.ClassTypeInformation")
-//						.addMember("onlyWith", "{ $T.class }", ClassName.get("org.springframework.graalvm.substitutions", "OnlyIfPresent"))
+						.addMember("onlyWith", "{ $T.class }", ClassName.get("org.springframework.graalvm.substitutions", "OnlyIfPresent"))
 						.build())
 				.addField(FieldSpec.builder(cacheType, "cache", Modifier.PRIVATE, Modifier.STATIC).addAnnotation(ClassName.get("com.oracle.svm.core.annotate", "Alias")).build())
 				.addMethod(fromMethod.build())
@@ -143,7 +146,7 @@ public class DataModelFileWriter {
 
 	void addPersistenceConstructor(TypeModel typeModel, JavaFileBuilder fileBuilder) {
 
-		String newInstanceStatement = DomainTypeConstructor.class.getTypeName() + ".<" + typeModel.getTypeName() + ">";
+		String newInstanceStatement = ConfigurableTypeConstructor.class.getTypeName() + ".<" + typeModel.getTypeName() + ">";
 		ConstructorModel constructor = typeModel.getConstructor();
 
 		if (constructor.isNoArgConstructor()) {
@@ -184,39 +187,44 @@ public class DataModelFileWriter {
 		String statement = "";
 //		TypeInformation<?> fieldTypeInformation = owner.getProperty(property.getName());
 
-		if (property.isSimpleType) {
-			boolean appendName = true;
-			statement = "$T.<" + property.getOwnerTypeName() + ">";
-			if (property.getType() == Long.class) {
-				statement += "int64";
-			} else if (property.getType() == Integer.class) {
-				statement += "int32";
-			} else if (property.getType() == String.class) {
-				statement += "string";
-			} else {
-				appendName = false;
-				Class<?> type = ClassUtils.resolvePrimitiveIfNecessary(property.getType());
-				statement = "((Field<" + type.getTypeName() + "," + property.getOwnerTypeName() + ">)$1T.type(\"" + property.getName() + "\", new org.springframework.data.mapping.model.DomainTypeInformation(" + type.getTypeName() + ".class)))";
-			}
-			if (appendName) {
-				statement += "(\"" + property.getName() + "\")";
-			}
+		if (SimpleConfiguredTypes.isKownSimpleConfiguredType(property.getType())) {
+
+
+			String template = "$T.<%s, %s>type(\"%s\", %s)";
+			String domainInfo = getConfiguredTypeInformationString(property);
+			statement = String.format(template, property.getOwnerTypeName(), property.getType().getName(), property.getName(), domainInfo );
+
+//			boolean appendName = true;
+//			statement = "$T.<" +property.getOwnerTypeName()+ "," + property.getType().getName() + ">simpleField(" + "\"" + property.getName() + "\", "+property.getType().getName()+".class)";
+
+
+//			if (property.getType() == Long.class) {
+//				statement += "longField";
+//			} else if (property.getType() == Integer.class) {
+//				statement += "int32";
+//			} else if (property.getType() == String.class) {
+//				statement += "string";
+//			} else {
+//				appendName = false;
+//				Class<?> type = ClassUtils.resolvePrimitiveIfNecessary(property.getType());
+//				statement = "((Field<" + type.getTypeName() + "," + property.getOwnerTypeName() + ">)$1T.type(\"" + property.getName() + "\", new org.springframework.data.mapping.model.DomainTypeInformation(" + type.getTypeName() + ".class)))";
+//			}
+//			if (appendName) {
+//				statement += "(\"" + property.getName() + "\")";
+//			}
 		} else if (property.isMapType()) {
+
+			MapPropertyModel mapProperty = (MapPropertyModel) property;
+			String typeInfo = getConfiguredTypeInformationString(property);
+			String template = "$T.<%s, %s<%s,%s>>type(\"%s\", %s)";
+			statement =  String.format(template, property.getOwnerTypeName(), mapProperty.getType().getTypeName(), mapProperty.getMapKeyType().getTypeName(), mapProperty.getMapValueType().getTypeName(), property.getName(), typeInfo);
 
 		} else if (property.isListType()) {
 
-			String template = "$T.<%s, %s<%s>>type(\"%s\", org.springframework.data.mapping.model.ListTypeInformation.listOf(%s))";
-
 			ListPropertyModel listPorperty = (ListPropertyModel) property;
-			String domainTypeInformation = "";
-			if (listPorperty.isSimpleValueType()) {
-				domainTypeInformation = "new DomainTypeInformation(" + listPorperty.getListValueType().getTypeName() + ".class)";
-			} else {
-				JavaFileBuilder fieldBuilder = getFileBuilder(listPorperty.getListValueTypeModel());
-				domainTypeInformation = fieldBuilder.generatedTypeName + ".instance()";
-			}
-
-			statement = String.format(template, property.getOwnerTypeName(), listPorperty.getType().getTypeName(), listPorperty.getListValueType().getTypeName(), property.getName(), domainTypeInformation);
+			String typeInfo = getConfiguredTypeInformationString(property);
+			String template = "$T.<%s, %s<%s>>type(\"%s\", %s)";
+			statement = String.format(template, property.getOwnerTypeName(), listPorperty.getType().getTypeName(), listPorperty.getListValueType().getTypeName(), property.getName(), typeInfo);
 		} else {
 			JavaFileBuilder fieldBuilder = getFileBuilder(domainTypes.getDomainTypeModelForClass(property.getType()).get());
 			statement = "$T.<" + property.getOwnerTypeName() + ", " + property.getType().getName() + ">type(\"" + property.getName() + "\", " + fieldBuilder.generatedTypeName + ".instance())";
@@ -241,6 +249,38 @@ public class DataModelFileWriter {
 		}
 
 		fileBuilder.fieldStatement(statement);
+	}
+
+	private String getConfiguredTypeInformationString(Class<?> type) {
+
+		if(SimpleConfiguredTypes.isKownSimpleConfiguredType(type)) {
+			return String.format("SimpleConfiguredTypes.get(%s.class)", type.getTypeName());
+		}
+
+
+
+		Optional<TypeModel> domainTypeModelForClass = domainTypes.getDomainTypeModelForClass(type);
+		if(domainTypeModelForClass.isPresent()) {
+			JavaFileBuilder fieldBuilder = getFileBuilder(domainTypeModelForClass.get());
+			return fieldBuilder.generatedTypeName + ".instance()";
+		}
+
+		return String.format("new DomainTypeInformation(%s)", type.getTypeName());
+	}
+
+	private String getConfiguredTypeInformationString(PropertyModel property) {
+
+		if(property.isListType()) {
+
+			ListPropertyModel listModel = (ListPropertyModel)property;
+			return String.format("org.springframework.data.mapping.model.ListTypeInformation.listOf(%s)", getConfiguredTypeInformationString(listModel.getListValueType()));
+		}
+		if(property.isMapType()) {
+			MapPropertyModel mapModel = (MapPropertyModel)property;
+			return String.format("org.springframework.data.mapping.model.MapTypeInformation.mapOf(%s,%s)", getConfiguredTypeInformationString(mapModel.getMapKeyType()), getConfiguredTypeInformationString(mapModel.getMapValueType()));
+		}
+
+		return getConfiguredTypeInformationString(property.getType());
 	}
 
 	private String annotationFrom(AnnotationModel model) {
@@ -291,7 +331,7 @@ public class DataModelFileWriter {
 
 	static class JavaFileBuilder {
 
-		private static final String TYPE_POSTFIX = "DomainTypeInformation";
+		private static final String TYPE_POSTFIX = "ConfigurableTypeInformation";
 
 		private TypeModel typeModel;
 		private String packageName;
@@ -358,7 +398,7 @@ public class DataModelFileWriter {
 
 			TypeSpec.Builder typeSpecBuilder = TypeSpec.classBuilder(simpleTypeName)
 					.addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-					.superclass(ParameterizedTypeName.get(ClassName.get(DomainTypeInformation.class),
+					.superclass(ParameterizedTypeName.get(ClassName.get(ConfigurableTypeInformation.class),
 							ClassName.get(typeModel.getType())));
 
 			// SINGLETON INSTANCE

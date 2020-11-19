@@ -17,31 +17,44 @@ package org.springframework.data.example.templates;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.example.repo.Address;
 import org.springframework.data.example.repo.Person;
-import org.springframework.data.mapping.model.DomainTypeConstructor;
-import org.springframework.data.mapping.model.DomainTypeInformation;
+import org.springframework.data.mapping.model.ConfigurableTypeConstructor;
+import org.springframework.data.mapping.model.ConfigurableTypeInformation;
 import org.springframework.data.mapping.model.Field;
 import org.springframework.data.mapping.model.ListTypeInformation;
+import org.springframework.data.mapping.model.MapTypeInformation;
+import org.springframework.data.mapping.model.SimpleConfiguredTypes;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
 /**
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class PersonTemplate extends DomainTypeInformation<Person> {
+public class PersonTemplate extends ConfigurableTypeInformation<Person> {
 
 	public PersonTemplate() {
 		super(Person.class);
 
-		setConstructor(DomainTypeConstructor.<org.springframework.data.example.repo.Person>builder().args("arg0", "arg1", "arg2", "arg3").newInstanceFunction((args) -> new org.springframework.data.example.repo.Person((java.lang.String) args[0], (java.lang.String) args[1], (java.lang.String) args[2], (org.springframework.data.example.repo.Address) args[3])));
-		setConstructor(DomainTypeConstructor.<org.springframework.data.example.repo.Person>builder().args("arg0", "arg1", "arg2", "arg3").newInstanceFunction((args) -> new org.springframework.data.example.repo.Person((java.lang.String) args[0], (java.lang.String) args[1], (java.lang.String) args[2], (org.springframework.data.example.repo.Address) args[3])));
+		setConstructor(ConfigurableTypeConstructor.<org.springframework.data.example.repo.Person>builder().args("arg0", "arg1", "arg2", "arg3").newInstanceFunction((args) -> new org.springframework.data.example.repo.Person((java.lang.String) args[0], (java.lang.String) args[1], (java.lang.String) args[2], (org.springframework.data.example.repo.Address) args[3])));
+		setConstructor(ConfigurableTypeConstructor.<org.springframework.data.example.repo.Person>builder().args("arg0", "arg1", "arg2", "arg3").newInstanceFunction((args) -> new org.springframework.data.example.repo.Person((java.lang.String) args[0], (java.lang.String) args[1], (java.lang.String) args[2], (org.springframework.data.example.repo.Address) args[3])));
 
 		Field.<Person, List<Address>> type("addressList", ListTypeInformation.listOf(new AddressTypeInformation())).getter(Person::getAddressList).setter(Person::setAddressList);
 
+		addField(Field.<org.springframework.data.example.repo.Person, java.util.List<org.springframework.data.example.repo.Address>>type("addressList", org.springframework.data.mapping.model.ListTypeInformation.listOf(AddressTypeInformation.instance())).getter(org.springframework.data.example.repo.Person::getAddressList).setter(org.springframework.data.example.repo.Person::setAddressList));
+
+//		Field.<> type("phoneNumbers", MapTypeInformation.mapOf(SimpleConfiguredTypes.get(String.class), SimpleConfiguredTypes.get(String.class)))
+//				.getter(Person::getPhoneNumbers).setter(Person::setPhoneNumbers);
+
+//		addField(Field.<org.springframework.data.example.repo.Person, java.util.Map<java.lang.String,java.lang.String>>type("phoneNumbers", org.springframework.data.mapping.model.MapTypeInformation.mapOf(SimpleConfiguredTypes.get(java.lang.String.class),SimpleConfiguredTypes.get(java.lang.String.class))).getter(org.springframework.data.example.repo.Person::getPhoneNumbers).setter(org.springframework.data.example.repo.Person::setPhoneNumbers));
+//
+//		addField(Field.<org.springframework.data.example.repo.Person, java.util.Map<java.lang.String,org.springframework.data.example.repo.Email>>type("emailAddresses", org.springframework.data.mapping.model.MapTypeInformation.mapOf(SimpleConfiguredTypes.get(java.lang.String.class),org.springframework.data.example.repo.EmailConfigurableTypeInformation.instance())).getter(org.springframework.data.example.repo.Person::getEmailAddresses).setter(org.springframework.data.example.repo.Person::setEmailAddresses));
+
+
 		Field.<Person, Address>type("address", new AddressTypeInformation()).setter(Person::setAddress).getter(Person::getAddress);
-		Field.<org.springframework.data.example.repo.Person>string("firstname").annotation(new org.springframework.data.mongodb.core.mapping.Field() {
+		Field.<org.springframework.data.example.repo.Person>stringField("firstname").annotation(new org.springframework.data.mongodb.core.mapping.Field() {
 			@Override
 			public Class<? extends Annotation> annotationType() {
 				return null;
@@ -102,10 +115,14 @@ public class PersonTemplate extends DomainTypeInformation<Person> {
 
 
 
-	static class AddressTypeInformation extends DomainTypeInformation<Address> {
+	static class AddressTypeInformation extends ConfigurableTypeInformation<Address> {
 
 		public AddressTypeInformation() {
 			super(Address.class);
+		}
+
+		static AddressTypeInformation instance() {
+			return new AddressTypeInformation();
 		}
 	}
 }

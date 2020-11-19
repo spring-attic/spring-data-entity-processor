@@ -293,6 +293,14 @@ public class PropertyModel {
 			return this;
 		}
 
+		public Class<?> getMapKeyType() {
+			return mapKeyType;
+		}
+
+		public Class<?> getMapValueType() {
+			return mapValueType;
+		}
+
 		@Override
 		public boolean isListType() {
 			return false;
