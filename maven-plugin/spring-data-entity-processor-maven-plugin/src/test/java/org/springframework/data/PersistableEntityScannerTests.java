@@ -31,11 +31,11 @@ import org.springframework.data.example.repo.Person;
 public class PersistableEntityScannerTests {
 
 	@Test
-	void xxx() {
+	void scansBasePackageForTypes() {
+
 		PersistableEntityScanner scanner = new PersistableEntityScanner();
 		List<Class<?>> types = scanner.scan("org.springframework.data.example");
 
-		System.out.println("types: " + types);
 		Assertions.assertThat(types).containsExactlyInAnyOrder(AnnotatedPerson.class, PersistablePerson.class, Person.class, Address.class);
 	}
 }
