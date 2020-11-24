@@ -199,7 +199,7 @@ public class DataModelFileWriter {
 		String variableName = propertyInfo.getName();
 		String typeArgs = String.format("%s,%s", propertyInfo.getOwnerTypeName(), propertyInfo.getTypeSignature());
 		String declaration = String.format("org.springframework.data.mapping.model.Field<%s>", typeArgs);
-		String fieldInit = String.format("org.springframework.data.mapping.model.Field.<%s>type", typeArgs);
+		String fieldInit = "org.springframework.data.mapping.model.Field.type";
 		String cti = computeTypeInfoInit(propertyInfo);
 		String typeInit = String.format("(\"%s\",%s)", propertyInfo.getName(), cti);
 

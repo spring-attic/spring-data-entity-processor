@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.DataModelFileWriter.JavaFileBuilder;
 import org.springframework.data.DataModelGeneratorUnitTests.InterfaceType;
 import org.springframework.data.mapping.model.ConfigurableTypeInformation;
+import org.springframework.data.mapping.model.Field;
+import org.springframework.data.mapping.model.ListTypeInformation;
+import org.springframework.data.mapping.model.SimpleConfiguredTypes;
 
 /**
  * @author Christoph Strobl
@@ -60,6 +63,14 @@ public class DataModelFileWriterUnitTest {
 		String init = typeInitString(ListTypes.class, "listOfString", List.class);
 		assertThat(init).isEqualTo("org.springframework.data.mapping.model.ListTypeInformation.listOf(org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class))");
 	}
+
+//	@Test
+//	void computeSimpleTypeListTypeInfo() {
+//
+//		String init = typeInitString(ListTypes.class, "listOfString", List.class);
+//		assertThat(init).isEqualTo("org.springframework.data.mapping.model.ListTypeInformation.listOf(org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class))");
+//	}
+
 
 	@Test
 	void computeSimpleTypeMapTypeInfo() {
@@ -120,6 +131,20 @@ public class DataModelFileWriterUnitTest {
 			org.springframework.data.mapping.model.Field<org.springframework.data.DataModelFileWriterUnitTest.JustSimpleTypes,java.lang.String> stringValue = org.springframework.data.mapping.model.Field.type("stringValue",org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class));
 			addField(stringValue);
 
+			Field<ListTypes, List<?>> withWildcard = Field.type("", ListTypeInformation.list());
+			withWildcard.setter(ListTypes::setListOfWildcard);
+
+		}
+	}
+
+	static class MapTypesInfo extends ConfigurableTypeInformation<MapTypes> {
+
+		MapTypesInfo() {
+			super(MapTypes.class);
+
+//			org.springframework.data.mapping.model.Field<MapTypesInfo,String> stringValue = org.springframework.data.mapping.model.Field.type("stringValue",org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class));
+//			addField(stringValue);
+
 		}
 	}
 
@@ -130,12 +155,29 @@ public class DataModelFileWriterUnitTest {
 	static class ListTypes {
 
 		List rawList;
+		List<?> listOfWildcard;
 		List<Object> listOfObject;
 		List<String> listOfString;
 		List<JustSimpleTypes> listOfComplexType;
 		List<InterfaceType> listOfInterface;
 		List<List<String>> listOfListOfString;
 		List<List<DataModelGeneratorUnitTests.JustSimpleTypes>> listOfListOfComplexType;
+
+		public List getRawList() {
+			return rawList;
+		}
+
+		public void setRawList(List rawList) {
+			this.rawList = rawList;
+		}
+
+		public List<?> getListOfWildcard() {
+			return listOfWildcard;
+		}
+
+		public void setListOfWildcard(List<?> listOfWildcard) {
+			this.listOfWildcard = listOfWildcard;
+		}
 
 		public List<Object> getListOfObject() {
 			return listOfObject;
