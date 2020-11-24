@@ -49,6 +49,10 @@ public class DataModelGenerator {
 		this.typeModels = new LinkedHashSet<>();
 	}
 
+	public DataModelGenerator() {
+		this(Collections.emptySet());
+	}
+
 
 	Set<TypeModel> process() {
 
@@ -82,18 +86,18 @@ public class DataModelGenerator {
 	void computeAndAddPropertyModels(TypeModel owner) {
 
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(owner.getType());
-		ClassTypeInformation<?> typeInformation = ClassTypeInformation.from(owner.getType());
+		ClassTypeInformation<?> ownerTypeInformation = ClassTypeInformation.from(owner.getType());
 
 		for (PropertyDescriptor descriptor : descriptors) {
 
 			Field field = ReflectionUtils.findField(owner.getType(), descriptor.getName());
 
-			Property property = field != null ? Property.of(typeInformation, field, descriptor) : Property.of(typeInformation, descriptor);
+			Property property = field != null ? Property.of(ownerTypeInformation, field, descriptor) : Property.of(ownerTypeInformation, descriptor);
 			if (isTransientProperty(property)) {
 				continue;
 			}
 
-			addPropertyModel(owner, typeInformation, property);
+			addPropertyModel(owner, ownerTypeInformation, property);
 		}
 	}
 

@@ -15,19 +15,25 @@
  */
 package org.springframework.data;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Target;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.example.repo.Person;
-import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mapping.model.ConfigurableTypeInformation;
+import org.springframework.data.mapping.model.Field;
+import org.springframework.data.mapping.model.ListTypeInformation;
+import org.springframework.data.mapping.model.SimpleConfiguredTypes;
 
 /**
  * @author Christoph Strobl
@@ -35,11 +41,98 @@ import org.springframework.data.mongodb.core.mapping.Field;
  */
 public class DataModelGeneratorUnitTests {
 
+
 	@Test
 	void xxx() {
 
 		Set<TypeModel> models = new DataModelGenerator(Collections.singleton(Person.class)).process();
 		models.forEach(System.out::println);
+	}
+
+	@Test
+	void detectsSimpleTypes() {
+
+		TypeModel typeModel = new DataModelGenerator().computeTypeModel(JustSimpleTypes.class);
+
+//		assertThat(typeModel.getProperty("stringValue")).satisfies(DataModelGeneratorUnitTests::isSimpleType);
+//		assertThat(typeModel.getProperty("intValue")).satisfies(DataModelGeneratorUnitTests::isSimpleType);
+//		assertThat(typeModel.getProperty("longValue")).satisfies(DataModelGeneratorUnitTests::isSimpleType);
+//		assertThat(typeModel.getProperty("dateValue")).satisfies(DataModelGeneratorUnitTests::isSimpleType);
+	}
+
+	@Test
+	void detectsListType() {
+
+//		PropertyModel propertyModel = computeProperty(ListTypes.class, "listOfObject");
+//		assertThat(propertyModel.isListType()).isTrue();
+	}
+
+	@Test
+	void detectsListValueType() {
+
+//		List<Object> listOfObject;
+//		List<String> listOfString;
+//		List<JustSimpleTypes> listOfComplexType;
+//		List<InterfaceType> listOfInterface;
+//		List<List<String>> listOfListOfString;
+//		List<List<JustSimpleTypes>> listOfListOfComplexType;
+
+//		assertThat(computeProperty(ListTypes.class, "listOfObject").asListModel().getListValueType()).isEqualTo(Object.class);
+//		assertThat(computeProperty(ListTypes.class, "listOfString").asListModel().getListValueType()).isEqualTo(String.class);
+//		assertThat(computeProperty(ListTypes.class, "listOfComplexType").asListModel().getListValueType()).isEqualTo(JustSimpleTypes.class);
+//		assertThat(computeProperty(ListTypes.class, "listOfInterface").asListModel().getListValueType()).isEqualTo(InterfaceType.class);
+//		assertThat(computeProperty(ListTypes.class, "listOfListOfString").asListModel().getListValueType()).isEqualTo(List.class);
+//		assertThat(computeProperty(ListTypes.class, "listOfListOfComplexType").asListModel().getListValueType()).isEqualTo(List.class);
+	}
+
+//	PropertyModel computeProperty(Class<?> type, String property) {
+//
+//		Optional<PropertyModel> model = new DataModelGenerator().computeTypeModel(type).getProperty(property);
+//		assertThat(model.isPresent());
+//		return model.get();
+//	}
+
+	private static void isSimpleType(Optional<PropertyModel> it) {
+
+		it.isPresent();
+		assertThat(it.get().isSimpleType()).isTrue();
+	}
+
+	static class JustSimpleTupesInfo extends ConfigurableTypeInformation<JustSimpleTypes> {
+
+		JustSimpleTupesInfo() {
+			super(JustSimpleTypes.class);
+
+			Field.<JustSimpleTypes,java.lang.String> type("stringValue", SimpleConfiguredTypes.get(java.lang.String.class))
+					.setter(JustSimpleTypes::setStringValue)
+					.getter(JustSimpleTypes::getStringValue);
+
+
+		}
+
+
+	}
+
+	static class ListTypesInfo extends ConfigurableTypeInformation<ListTypes> {
+
+		ListTypesInfo() {
+			super(ListTypes.class);
+
+			Field.<ListTypes,List<String>> type("stringValue", ListTypeInformation.listOf(SimpleConfiguredTypes.get(String.class)))
+					.setter(ListTypes::setListOfString)
+					.getter(ListTypes::getListOfString);
+
+			Field.<ListTypes,List<List<String>>> type("listOfString", ListTypeInformation.listOf(ListTypeInformation.listOf(SimpleConfiguredTypes.get(String.class))))
+					.setter(ListTypes::setListOfListOfString)
+					.getter(ListTypes::getListOfListOfString);
+
+			Field.<ListTypes,List<List<String>>> type("listOfString", ListTypeInformation.listOf(ListTypeInformation.listOf(SimpleConfiguredTypes.get(String.class))))
+					.setter(ListTypes::setListOfListOfString)
+					.getter(ListTypes::getListOfListOfString);
+
+		}
+
+
 	}
 
 	static class JustSimpleTypes {
@@ -50,6 +143,46 @@ public class DataModelGeneratorUnitTests {
 
 		Date dateValue;
 		EnumType enumValue;
+
+		public String getStringValue() {
+			return stringValue;
+		}
+
+		public void setStringValue(String stringValue) {
+			this.stringValue = stringValue;
+		}
+
+		public Integer getIntValue() {
+			return intValue;
+		}
+
+		public void setIntValue(Integer intValue) {
+			this.intValue = intValue;
+		}
+
+		public Long getLongValue() {
+			return longValue;
+		}
+
+		public void setLongValue(Long longValue) {
+			this.longValue = longValue;
+		}
+
+		public Date getDateValue() {
+			return dateValue;
+		}
+
+		public void setDateValue(Date dateValue) {
+			this.dateValue = dateValue;
+		}
+
+		public EnumType getEnumValue() {
+			return enumValue;
+		}
+
+		public void setEnumValue(EnumType enumValue) {
+			this.enumValue = enumValue;
+		}
 	}
 
 	enum EnumType {
@@ -64,6 +197,54 @@ public class DataModelGeneratorUnitTests {
 		List<InterfaceType> listOfInterface;
 		List<List<String>> listOfListOfString;
 		List<List<JustSimpleTypes>> listOfListOfComplexType;
+
+		public List<Object> getListOfObject() {
+			return listOfObject;
+		}
+
+		public void setListOfObject(List<Object> listOfObject) {
+			this.listOfObject = listOfObject;
+		}
+
+		public List<String> getListOfString() {
+			return listOfString;
+		}
+
+		public void setListOfString(List<String> listOfString) {
+			this.listOfString = listOfString;
+		}
+
+		public List<JustSimpleTypes> getListOfComplexType() {
+			return listOfComplexType;
+		}
+
+		public void setListOfComplexType(List<JustSimpleTypes> listOfComplexType) {
+			this.listOfComplexType = listOfComplexType;
+		}
+
+		public List<InterfaceType> getListOfInterface() {
+			return listOfInterface;
+		}
+
+		public void setListOfInterface(List<InterfaceType> listOfInterface) {
+			this.listOfInterface = listOfInterface;
+		}
+
+		public List<List<String>> getListOfListOfString() {
+			return listOfListOfString;
+		}
+
+		public void setListOfListOfString(List<List<String>> listOfListOfString) {
+			this.listOfListOfString = listOfListOfString;
+		}
+
+		public List<List<JustSimpleTypes>> getListOfListOfComplexType() {
+			return listOfListOfComplexType;
+		}
+
+		public void setListOfListOfComplexType(List<List<JustSimpleTypes>> listOfListOfComplexType) {
+			this.listOfListOfComplexType = listOfListOfComplexType;
+		}
 	}
 
 	static class MapTypes {
@@ -163,6 +344,7 @@ public class DataModelGeneratorUnitTests {
 
 	@Target({ElementType.TYPE, ElementType.FIELD})
 	static @interface AnnotationContainer {
+
 		AnnotationType[] value() default {};
 	}
 }

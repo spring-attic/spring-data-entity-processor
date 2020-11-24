@@ -16,11 +16,9 @@
 package org.springframework.data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import org.springframework.data.PropertyModel.ListPropertyModel;
 import org.springframework.data.mapping.PreferredConstructor;
 import org.springframework.data.mapping.PreferredConstructor.Parameter;
 import org.springframework.data.mapping.model.PreferredConstructorDiscoverer;
@@ -48,7 +46,7 @@ public class ConstructorModel {
 
 	private List<ParameterModel> computeParameters(PreferredConstructor constructor) {
 
-		if(constructor == null) {
+		if (constructor == null) {
 			return Collections.emptyList();
 		}
 		List<ParameterModel> model = new ArrayList<>();
