@@ -19,12 +19,12 @@ package org.springframework.data;
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class ParameterModel {
+public class ParameterInfo {
 
 	String name;
 	Class<?> type;
 
-	public ParameterModel(String name, Class<?> type) {
+	public ParameterInfo(String name, Class<?> type) {
 		this.name = name;
 		this.type = type;
 	}

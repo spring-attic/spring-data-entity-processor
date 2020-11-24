@@ -20,22 +20,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class ResolveableTypeInfo {
+public class GenericsInfo {
 
-	ResolvableType resolvableType;
+	private final ResolvableType resolvableType;
 
-	public ResolveableTypeInfo(ResolvableType resolvableType) {
+	public GenericsInfo(ResolvableType resolvableType) {
 		this.resolvableType = resolvableType;
 	}
 
 	String getSignature() {
 		return getSignature(resolvableType);
+	}
+
+	public ResolvableType getResolvableType() {
+		return resolvableType;
 	}
 
 	String getSignature(ResolvableType type) {
@@ -59,6 +64,6 @@ public class ResolveableTypeInfo {
 			tmp += StringUtils.collectionToDelimitedString(args, ", ") + '>';
 			return tmp;
 		}
-		return type.resolve().getCanonicalName();
+		return ClassUtils.resolvePrimitiveIfNecessary(type.resolve()).getCanonicalName();
 	}
 }

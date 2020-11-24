@@ -29,14 +29,14 @@ import org.springframework.data.mapping.model.PreferredConstructorDiscoverer;
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class TypeModel implements Iterable<PropertyModel> {
+public class TypeInfo implements Iterable<PropertyInfo> {
 
 	private final Class<?> type;
 	private final Set<AnnotationModel> annotations;
-	private final Set<PropertyModel> properties;
-	private ConstructorModel constructor;
+	private final Set<PropertyInfo> properties;
+	private ConstructorInfo constructor;
 
-	public TypeModel(Class<?> type) {
+	public TypeInfo(Class<?> type) {
 
 		this.type = type;
 		this.annotations = new LinkedHashSet<>();
@@ -53,18 +53,18 @@ public class TypeModel implements Iterable<PropertyModel> {
 		return annotations;
 	}
 
-	public TypeModel annotations(Set<AnnotationModel> annotations) {
+	public TypeInfo annotations(Set<AnnotationModel> annotations) {
 		this.annotations.addAll(annotations);
 		return this;
 	}
 
-	public void setConstructor(ConstructorModel constructor) {
+	public void setConstructor(ConstructorInfo constructor) {
 		this.constructor = constructor;
 	}
 
-	TypeModel addProperty(PropertyModel propertyModel) {
+	TypeInfo addProperty(PropertyInfo propertyInfo) {
 
-		this.properties.add(propertyModel);
+		this.properties.add(propertyInfo);
 		return this;
 	}
 
@@ -77,7 +77,7 @@ public class TypeModel implements Iterable<PropertyModel> {
 	}
 
 
-	public ConstructorModel getConstructor() {
+	public ConstructorInfo getConstructor() {
 		return constructor;
 	}
 
@@ -92,7 +92,7 @@ public class TypeModel implements Iterable<PropertyModel> {
 	}
 
 	@Override
-	public Iterator<PropertyModel> iterator() {
+	public Iterator<PropertyInfo> iterator() {
 		return this.properties.iterator();
 	}
 }

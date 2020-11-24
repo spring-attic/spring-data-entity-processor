@@ -40,13 +40,13 @@ public class DataModelGenerator {
 	private final Set<Class<?>> domainTypes;
 	private final Set<Class<?>> processed;
 
-	private final Set<TypeModel> typeModels;
+	private final Set<TypeInfo> typeInfos;
 
 	public DataModelGenerator(Set<Class<?>> domainTypes) {
 
 		this.domainTypes = domainTypes;
 		this.processed = new LinkedHashSet<>();
-		this.typeModels = new LinkedHashSet<>();
+		this.typeInfos = new LinkedHashSet<>();
 	}
 
 	public DataModelGenerator() {
@@ -54,36 +54,36 @@ public class DataModelGenerator {
 	}
 
 
-	Set<TypeModel> process() {
+	Set<TypeInfo> process() {
 
 		for (Class<?> domainType : domainTypes) {
 			computeTypeModel(domainType);
 		}
 
-		return typeModels;
+		return typeInfos;
 	}
 
-	TypeModel computeTypeModel(Class<?> domainType) {
+	TypeInfo computeTypeModel(Class<?> domainType) {
 
 		{
-			Optional<TypeModel> typeModel = typeModelFor(domainType);
+			Optional<TypeInfo> typeModel = typeModelFor(domainType);
 			if (typeModel.isPresent()) {
 				return typeModel.get();
 			}
 		}
 
-		TypeModel typeModel = new TypeModel(domainType);
-		typeModels.add(typeModel);
+		TypeInfo typeInfo = new TypeInfo(domainType);
+		typeInfos.add(typeInfo);
 
-		typeModel.setConstructor(new ConstructorModel(domainType));
-		computeAndAddPropertyModels(typeModel);
+		typeInfo.setConstructor(new ConstructorInfo(domainType));
+		computeAndAddPropertyModels(typeInfo);
 		Set<AnnotationModel> annotations = computeAnnotation(domainType);
-		typeModel.annotations(annotations);
+		typeInfo.annotations(annotations);
 
-		return typeModel;
+		return typeInfo;
 	}
 
-	void computeAndAddPropertyModels(TypeModel owner) {
+	void computeAndAddPropertyModels(TypeInfo owner) {
 
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(owner.getType());
 		ClassTypeInformation<?> ownerTypeInformation = ClassTypeInformation.from(owner.getType());
@@ -101,13 +101,13 @@ public class DataModelGenerator {
 		}
 	}
 
-	void addPropertyModel(TypeModel owner, ClassTypeInformation<?> ownerTypeInformation, Property property) {
+	void addPropertyModel(TypeInfo owner, ClassTypeInformation<?> ownerTypeInformation, Property property) {
 
-		PropertyModel propertyModel = new PropertyModel(owner, property.getName(), property.getType());
+		PropertyInfo propertyInfo = new PropertyInfo(owner, property.getName(), property.getType());
 
 		TypeInformation<?> fieldTypeInformation = ownerTypeInformation.getProperty(property.getName());
 		if (isSimpleType(fieldTypeInformation)) {
-			propertyModel = propertyModel.simpleType();
+			propertyInfo = propertyInfo.simpleType();
 		} else if (fieldTypeInformation.isMap()) {
 
 			TypeInformation<?> keyType = fieldTypeInformation.getComponentType();
@@ -115,48 +115,50 @@ public class DataModelGenerator {
 
 			if (isSimpleType(keyType)) {
 				if (isSimpleType(valueType)) {
-					propertyModel = propertyModel.mapOf(keyType.getType(), valueType.getType());
+					propertyInfo = propertyInfo.mapOf(keyType.getType(), valueType.getType());
 				} else {
-					propertyModel = propertyModel.mapOf(keyType.getType(), computeTypeModel(valueType.getType()));
+					propertyInfo = propertyInfo.mapOf(keyType.getType(), computeTypeModel(valueType.getType()));
 				}
 			} else {
 				if (isSimpleType(valueType)) {
-					propertyModel = propertyModel.mapOf(computeTypeModel(keyType.getType()), valueType.getType());
+					propertyInfo = propertyInfo.mapOf(computeTypeModel(keyType.getType()), valueType.getType());
 				} else {
-					propertyModel = propertyModel.mapOf(computeTypeModel(keyType.getType()), computeTypeModel(valueType.getType()));
+					propertyInfo = propertyInfo.mapOf(computeTypeModel(keyType.getType()), computeTypeModel(valueType.getType()));
 				}
 			}
 		} else if (fieldTypeInformation.isCollectionLike()) {
 
 			TypeInformation<?> valueType = fieldTypeInformation.getActualType().getActualType();
 			if (isSimpleType(valueType)) {
-				propertyModel = propertyModel.listOf(valueType.getType());
+				propertyInfo = propertyInfo.listOf(valueType.getType());
 			} else {
-				propertyModel = propertyModel.listOf(computeTypeModel(valueType.getType()));
+				propertyInfo = propertyInfo.listOf(computeTypeModel(valueType.getType()));
 			}
 		} else {
 
-			TypeModel typeModel = computeTypeModel(property.getType());
-			propertyModel = propertyModel.domainType(typeModel);
+			TypeInfo typeInfo = computeTypeModel(property.getType());
+			propertyInfo = propertyInfo.domainType(typeInfo);
 		}
 
 		if (property.getGetter().isPresent()) {
-			propertyModel = propertyModel.getter(property.getGetter().get());
+			propertyInfo = propertyInfo.getter(property.getGetter().get());
 		}
 		if (property.getSetter().isPresent()) {
-			propertyModel = propertyModel.setter(property.getSetter().get());
+			propertyInfo = propertyInfo.setter(property.getSetter().get());
 		}
 		if (property.getWither().isPresent()) {
-			propertyModel = propertyModel.wither(property.getWither().get());
+			propertyInfo = propertyInfo.wither(property.getWither().get());
 		}
 
 		if (property.isFieldBacked()) {
 
 			Set<AnnotationModel> annotations = computeAnnotation(property.getField().get());
-			propertyModel.annotations(annotations);
+			propertyInfo.annotations(annotations);
+
+			propertyInfo.setField(property.getField().get());
 		}
 
-		owner.addProperty(propertyModel);
+		owner.addProperty(propertyInfo);
 	}
 
 	private Set<AnnotationModel> computeAnnotation(AnnotatedElement element) {
@@ -180,8 +182,8 @@ public class DataModelGenerator {
 		return false;
 	}
 
-	Optional<TypeModel> typeModelFor(Class<?> type) {
-		return typeModels.stream().filter(it -> it.getType().equals(type)).findFirst();
+	Optional<TypeInfo> typeModelFor(Class<?> type) {
+		return typeInfos.stream().filter(it -> it.getType().equals(type)).findFirst();
 	}
 
 	private boolean isSimpleType(TypeInformation<?> typeInformation) {

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -33,7 +34,9 @@ import org.springframework.data.example.repo.Person;
 import org.springframework.data.mapping.model.ConfigurableTypeInformation;
 import org.springframework.data.mapping.model.Field;
 import org.springframework.data.mapping.model.ListTypeInformation;
+import org.springframework.data.mapping.model.MapTypeInformation;
 import org.springframework.data.mapping.model.SimpleConfiguredTypes;
+import org.springframework.data.util.ClassTypeInformation;
 
 /**
  * @author Christoph Strobl
@@ -45,14 +48,14 @@ public class DataModelGeneratorUnitTests {
 	@Test
 	void xxx() {
 
-		Set<TypeModel> models = new DataModelGenerator(Collections.singleton(Person.class)).process();
+		Set<TypeInfo> models = new DataModelGenerator(Collections.singleton(Person.class)).process();
 		models.forEach(System.out::println);
 	}
 
 	@Test
 	void detectsSimpleTypes() {
 
-		TypeModel typeModel = new DataModelGenerator().computeTypeModel(JustSimpleTypes.class);
+		TypeInfo typeInfo = new DataModelGenerator().computeTypeModel(JustSimpleTypes.class);
 
 //		assertThat(typeModel.getProperty("stringValue")).satisfies(DataModelGeneratorUnitTests::isSimpleType);
 //		assertThat(typeModel.getProperty("intValue")).satisfies(DataModelGeneratorUnitTests::isSimpleType);
@@ -92,7 +95,7 @@ public class DataModelGeneratorUnitTests {
 //		return model.get();
 //	}
 
-	private static void isSimpleType(Optional<PropertyModel> it) {
+	private static void isSimpleType(Optional<PropertyInfo> it) {
 
 		it.isPresent();
 		assertThat(it.get().isSimpleType()).isTrue();
@@ -191,6 +194,7 @@ public class DataModelGeneratorUnitTests {
 
 	static class ListTypes {
 
+		List rawList;
 		List<Object> listOfObject;
 		List<String> listOfString;
 		List<JustSimpleTypes> listOfComplexType;
@@ -245,10 +249,19 @@ public class DataModelGeneratorUnitTests {
 		public void setListOfListOfComplexType(List<List<JustSimpleTypes>> listOfListOfComplexType) {
 			this.listOfListOfComplexType = listOfListOfComplexType;
 		}
+
+		public List getRawList() {
+			return rawList;
+		}
+
+		public void setRawList(List rawList) {
+			this.rawList = rawList;
+		}
 	}
 
 	static class MapTypes {
 
+		Map rawMap;
 		Map<Object, Object> mapOfObject;
 		Map<String, String> mapOfString;
 		Map<String, JustSimpleTypes> mapOfComplexValueType;
@@ -256,6 +269,84 @@ public class DataModelGeneratorUnitTests {
 		Map<String, InterfaceType> mapOfInterfaceValueType;
 		Map<String, List<String>> mapOfListOfStringValueType;
 		Map<String, List<JustSimpleTypes>> mapOfListOfComplexValueType;
+
+		public Map<Object, Object> getMapOfObject() {
+			return mapOfObject;
+		}
+
+		public void setMapOfObject(Map<Object, Object> mapOfObject) {
+			this.mapOfObject = mapOfObject;
+		}
+
+		public Map<String, String> getMapOfString() {
+			return mapOfString;
+		}
+
+		public void setMapOfString(Map<String, String> mapOfString) {
+			this.mapOfString = mapOfString;
+		}
+
+		public Map<String, JustSimpleTypes> getMapOfComplexValueType() {
+			return mapOfComplexValueType;
+		}
+
+		public void setMapOfComplexValueType(Map<String, JustSimpleTypes> mapOfComplexValueType) {
+			this.mapOfComplexValueType = mapOfComplexValueType;
+		}
+
+		public Map<JustSimpleTypes, JustSimpleTypes> getMapOfComplexKeyValueType() {
+			return mapOfComplexKeyValueType;
+		}
+
+		public void setMapOfComplexKeyValueType(Map<JustSimpleTypes, JustSimpleTypes> mapOfComplexKeyValueType) {
+			this.mapOfComplexKeyValueType = mapOfComplexKeyValueType;
+		}
+
+		public Map<String, InterfaceType> getMapOfInterfaceValueType() {
+			return mapOfInterfaceValueType;
+		}
+
+		public void setMapOfInterfaceValueType(Map<String, InterfaceType> mapOfInterfaceValueType) {
+			this.mapOfInterfaceValueType = mapOfInterfaceValueType;
+		}
+
+		public Map<String, List<String>> getMapOfListOfStringValueType() {
+			return mapOfListOfStringValueType;
+		}
+
+		public void setMapOfListOfStringValueType(Map<String, List<String>> mapOfListOfStringValueType) {
+			this.mapOfListOfStringValueType = mapOfListOfStringValueType;
+		}
+
+		public Map<String, List<JustSimpleTypes>> getMapOfListOfComplexValueType() {
+			return mapOfListOfComplexValueType;
+		}
+
+		public void setMapOfListOfComplexValueType(Map<String, List<JustSimpleTypes>> mapOfListOfComplexValueType) {
+			this.mapOfListOfComplexValueType = mapOfListOfComplexValueType;
+		}
+
+		public Map getRawMap() {
+			return rawMap;
+		}
+
+		public void setRawMap(Map rawMap) {
+			this.rawMap = rawMap;
+		}
+	}
+
+	static class ListTypesTypeInfo extends ConfigurableTypeInformation<ListTypes> {
+
+		public ListTypesTypeInfo() {
+			super(ListTypes.class);
+
+			Field<ListTypes, List> rawList = Field.<ListTypes, Map>type("rawList", MapTypeInformation.map());
+			rawList.setter(ListTypes::setRawList);
+			addField(rawList);
+
+		}
+
+
 	}
 
 	static class CyclicType {

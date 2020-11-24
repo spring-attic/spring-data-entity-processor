@@ -15,21 +15,31 @@
  */
 package org.springframework.data;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import org.springframework.core.ResolvableType;
+import org.springframework.data.mapping.model.SimpleConfiguredTypes;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class PropertyModel {
-
-	private final Class<?> type;
-	private final TypeModel owner;
-	private TypeModel typeModel;
-	private Set<AnnotationModel> annotations;
+public class PropertyInfo {
 
 	private final String name;
+	private final Class<?> type;
+	private final TypeInfo owner;
+
+	private Field field;
+	private GenericsInfo genericsInfo;
+	private Set<AnnotationModel> annotations;
 
 	private Method getter;
 	private Method setter;
@@ -40,27 +50,42 @@ public class PropertyModel {
 	boolean isMapType;
 
 
-	public PropertyModel(TypeModel owner, String name, Class<?> type) {
+	public PropertyInfo(TypeInfo owner, String name, Class<?> type) {
 
 		this.owner = owner;
 		this.name = name;
 		this.type = type;
+
+		setField(ReflectionUtils.findField(owner.getType(), name));
+		this.isListType = ClassUtils.isAssignable(List.class, type);
+		this.isMapType = ClassUtils.isAssignable(Map.class, type);
+		this.isSimpleType = SimpleConfiguredTypes.isKownSimpleConfiguredType(type);
 	}
 
-	PropertyModel simpleType() {
+	PropertyInfo simpleType() {
 		this.isSimpleType = true;
 		return this;
 	}
 
+	public GenericsInfo getGenericsInfo() {
+		return genericsInfo;
+	}
+
+	public void setField(Field field) {
+
+		this.field = field;
+		genericsInfo = new GenericsInfo(ResolvableType.forField(field));
+	}
+
 	public String getOwnerTypeName() {
-		return getOwner().getTypeName();
+		return getOwner().getType().getCanonicalName();
 	}
 
 	public Class<?> getOwnerType() {
 		return getOwner().getType();
 	}
 
-	public TypeModel getOwner() {
+	public TypeInfo getOwner() {
 		return owner;
 	}
 
@@ -84,19 +109,19 @@ public class PropertyModel {
 		return isMapType;
 	}
 
-	public PropertyModel getter(Method method) {
+	public PropertyInfo getter(Method method) {
 
 		this.getter = method;
 		return this;
 	}
 
-	public PropertyModel setter(Method method) {
+	public PropertyInfo setter(Method method) {
 
 		this.setter = method;
 		return this;
 	}
 
-	public PropertyModel wither(Method method) {
+	public PropertyInfo wither(Method method) {
 
 		this.wither = method;
 		return this;
@@ -126,43 +151,46 @@ public class PropertyModel {
 		return wither != null;
 	}
 
-	ListPropertyModel listOf(Class<?> type) {
-		return new ListPropertyModel(this).listValueType(type);
+	ListPropertyInfo listOf(Class<?> type) {
+		return new ListPropertyInfo(this).listValueType(type);
 	}
 
-	ListPropertyModel listOf(TypeModel model) {
-		return new ListPropertyModel(this).listValueType(model);
+	ListPropertyInfo listOf(TypeInfo model) {
+		return new ListPropertyInfo(this).listValueType(model);
 	}
 
-	MapPropertyModel mapOf(TypeModel key, TypeModel value) {
-		return new MapPropertyModel(this).mapKeyType(key).mapValueType(value);
+	MapPropertyInfo mapOf(TypeInfo key, TypeInfo value) {
+		return new MapPropertyInfo(this).mapKeyType(key).mapValueType(value);
 	}
 
-	MapPropertyModel mapOf(Class<?> key, TypeModel value) {
-		return new MapPropertyModel(this).mapKeyType(key).mapValueType(value);
+	MapPropertyInfo mapOf(Class<?> key, TypeInfo value) {
+		return new MapPropertyInfo(this).mapKeyType(key).mapValueType(value);
 	}
 
-	MapPropertyModel mapOf(TypeModel key, Class<?> value) {
-		return new MapPropertyModel(this).mapKeyType(key).mapValueType(value);
+	MapPropertyInfo mapOf(TypeInfo key, Class<?> value) {
+		return new MapPropertyInfo(this).mapKeyType(key).mapValueType(value);
 	}
 
-	MapPropertyModel mapOf(Class<?> key, Class<?> value) {
-		return new MapPropertyModel(this).mapKeyType(key).mapValueType(value);
+	MapPropertyInfo mapOf(Class<?> key, Class<?> value) {
+		return new MapPropertyInfo(this).mapKeyType(key).mapValueType(value);
 	}
 
-	DomainTypePropertyModel domainType(TypeModel typeModel) {
-		return new DomainTypePropertyModel(this).type(typeModel);
+	DomainTypePropertyInfo domainType(TypeInfo typeInfo) {
+		return new DomainTypePropertyInfo(this).type(typeInfo);
 	}
 
 	public void annotations(Set<AnnotationModel> annotations) {
 		this.annotations = annotations;
 	}
 
+	String getTypeSignature() {
+		return genericsInfo != null ? genericsInfo.getSignature() : getType().getCanonicalName();
+	}
+
 	@Override
 	public String toString() {
 		return "PropertyModel(" + getName() + "){" +
 				"type=" + type +
-				", typeModel=" + typeModel +
 				", annotations=" + annotations +
 				'}';
 	}
@@ -172,24 +200,24 @@ public class PropertyModel {
 	}
 
 
-	static class ListPropertyModel extends PropertyModel {
+	static class ListPropertyInfo extends PropertyInfo {
 
 		private Class<?> listValueType;
-		private TypeModel listValueTypeModel;
+		private TypeInfo listValueTypeInfo;
 
-		public ListPropertyModel(PropertyModel delegate) {
+		public ListPropertyInfo(PropertyInfo delegate) {
 			super(delegate.getOwner(), delegate.getName(), delegate.getType());
 		}
 
-		public ListPropertyModel listValueType(Class<?> model) {
+		public ListPropertyInfo listValueType(Class<?> model) {
 			this.listValueType = model;
 			return this;
 		}
 
-		public ListPropertyModel listValueType(TypeModel model) {
+		public ListPropertyInfo listValueType(TypeInfo model) {
 
 			listValueType(model.getType());
-			this.listValueTypeModel = model;
+			this.listValueTypeInfo = model;
 			return this;
 		}
 
@@ -202,41 +230,41 @@ public class PropertyModel {
 		public String toString() {
 			return "ListPropertyModel(" + getName() + "){" +
 					"listValueType=" + listValueType +
-					", listValueTypeModel=" + listValueTypeModel +
+					", listValueTypeModel=" + listValueTypeInfo +
 					'}';
 		}
 
 		public boolean isSimpleValueType() {
-			return listValueTypeModel == null;
+			return listValueTypeInfo == null;
 		}
 
 		public Class<?> getListValueType() {
 			return listValueType;
 		}
 
-		public TypeModel getListValueTypeModel() {
-			return listValueTypeModel;
+		public TypeInfo getListValueTypeInfo() {
+			return listValueTypeInfo;
 		}
 	}
 
-	static class DomainTypePropertyModel extends PropertyModel {
+	static class DomainTypePropertyInfo extends PropertyInfo {
 
-		private TypeModel typeModel;
+		private TypeInfo typeInfo;
 
-		public DomainTypePropertyModel(PropertyModel delegate) {
+		public DomainTypePropertyInfo(PropertyInfo delegate) {
 			super(delegate.getOwner(), delegate.getName(), delegate.getType());
 		}
 
-		public DomainTypePropertyModel type(TypeModel typeModel) {
+		public DomainTypePropertyInfo type(TypeInfo typeInfo) {
 
-			this.typeModel = typeModel;
+			this.typeInfo = typeInfo;
 			return this;
 		}
 
 		@Override
 		public String toString() {
 			return "DomainTypePropertyModel(" + getName() + "){" +
-					"typeModel=" + typeModel +
+					"typeModel=" + typeInfo +
 					'}';
 		}
 
@@ -256,40 +284,40 @@ public class PropertyModel {
 		}
 	}
 
-	static class MapPropertyModel extends PropertyModel {
+	static class MapPropertyInfo extends PropertyInfo {
 
 		private Class<?> mapKeyType;
-		private TypeModel mapKeyTypeModel;
+		private TypeInfo mapKeyTypeInfo;
 		private Class<?> mapValueType;
-		private TypeModel mapValueTypeModel;
+		private TypeInfo mapValueTypeInfo;
 
-		public MapPropertyModel(PropertyModel delegate) {
+		public MapPropertyInfo(PropertyInfo delegate) {
 			super(delegate.getOwner(), delegate.getName(), delegate.getType());
 		}
 
 
-		public MapPropertyModel mapValueType(Class<?> valueType) {
+		public MapPropertyInfo mapValueType(Class<?> valueType) {
 
 			this.mapValueType = valueType;
 			return this;
 		}
 
-		public MapPropertyModel mapValueType(TypeModel model) {
+		public MapPropertyInfo mapValueType(TypeInfo model) {
 
 			mapValueType(model.getType());
-			this.mapValueTypeModel = model;
+			this.mapValueTypeInfo = model;
 			return this;
 		}
 
-		public MapPropertyModel mapKeyType(Class<?> keyType) {
+		public MapPropertyInfo mapKeyType(Class<?> keyType) {
 			this.mapKeyType = keyType;
 			return this;
 		}
 
-		public MapPropertyModel mapKeyType(TypeModel model) {
+		public MapPropertyInfo mapKeyType(TypeInfo model) {
 
 			this.mapValueType = model.getType();
-			this.mapValueTypeModel = model;
+			this.mapValueTypeInfo = model;
 			return this;
 		}
 
@@ -320,9 +348,9 @@ public class PropertyModel {
 		public String toString() {
 			return "MapPropertyModel(" + getName() + "){" +
 					"mapKeyType=" + mapKeyType +
-					", mapKeyTypeModel=" + mapKeyTypeModel +
+					", mapKeyTypeModel=" + mapKeyTypeInfo +
 					", mapValueType=" + mapValueType +
-					", mapValueTypeModel=" + mapValueTypeModel +
+					", mapValueTypeModel=" + mapValueTypeInfo +
 					'}';
 		}
 	}

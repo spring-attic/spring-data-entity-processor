@@ -26,28 +26,28 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class DomainTypes implements Iterable<TypeModel> {
+public class DomainTypes implements Iterable<TypeInfo> {
 
-	private final Set<TypeModel> domainTypes;
+	private final Set<TypeInfo> domainTypes;
 
 	public DomainTypes() {
 		this(Collections.emptySet());
 	}
 
-	public DomainTypes(Set<TypeModel> typeModels) {
-		this.domainTypes = new LinkedHashSet<>(typeModels);
+	public DomainTypes(Set<TypeInfo> typeInfos) {
+		this.domainTypes = new LinkedHashSet<>(typeInfos);
 	}
 
 	boolean containsDomainTypeModelForClass(Class<?> type) {
 		return getDomainTypeModelForClass(type).isPresent();
 	}
 
-	Optional<TypeModel> getDomainTypeModelForClass(Class<?> type) {
+	Optional<TypeInfo> getDomainTypeModelForClass(Class<?> type) {
 		return domainTypes.stream().filter(it -> it.getType().equals(type)).findFirst();
 	}
 
 	@Override
-	public Iterator<TypeModel> iterator() {
+	public Iterator<TypeInfo> iterator() {
 		return domainTypes.iterator();
 	}
 }

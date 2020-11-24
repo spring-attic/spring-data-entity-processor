@@ -27,12 +27,12 @@ import org.springframework.data.mapping.model.PreferredConstructorDiscoverer;
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class ConstructorModel {
+public class ConstructorInfo {
 
 	Class<?> type;
-	List<ParameterModel> parameterList;
+	List<ParameterInfo> parameterList;
 
-	public ConstructorModel(Class<?> type) {
+	public ConstructorInfo(Class<?> type) {
 
 		this.type = type;
 
@@ -40,20 +40,20 @@ public class ConstructorModel {
 		this.parameterList = computeParameters(constructor);
 	}
 
-	public List<ParameterModel> getParameterList() {
+	public List<ParameterInfo> getParameterList() {
 		return parameterList;
 	}
 
-	private List<ParameterModel> computeParameters(PreferredConstructor constructor) {
+	private List<ParameterInfo> computeParameters(PreferredConstructor constructor) {
 
 		if (constructor == null) {
 			return Collections.emptyList();
 		}
-		List<ParameterModel> model = new ArrayList<>();
+		List<ParameterInfo> model = new ArrayList<>();
 		constructor.getParameters().forEach(it -> {
 
 			Parameter param = ((Parameter) it);
-			model.add(new ParameterModel(param.getName(), param.getRawType()));
+			model.add(new ParameterInfo(param.getName(), param.getRawType()));
 		});
 		return model;
 	}
