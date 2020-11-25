@@ -15,12 +15,13 @@
  */
 package org.springframework.data;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * @author Christoph Strobl
@@ -28,7 +29,12 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class DomainTypes implements Iterable<TypeInfo> {
 
+
 	private final Set<TypeInfo> domainTypes;
+
+	static DomainTypes empty() {
+		return new DomainTypes();
+	}
 
 	public DomainTypes() {
 		this(Collections.emptySet());

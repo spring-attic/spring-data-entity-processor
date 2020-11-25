@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.example.annotated.AnnotatedPerson;
 import org.springframework.data.example.persitable.PersistablePerson;
 import org.springframework.data.example.repo.Address;
+import org.springframework.data.example.repo.Email;
 import org.springframework.data.example.repo.Person;
 
 /**
@@ -36,6 +37,6 @@ public class PersistableEntityScannerTests {
 		PersistableEntityScanner scanner = new PersistableEntityScanner();
 		List<Class<?>> types = scanner.scan("org.springframework.data.example");
 
-		Assertions.assertThat(types).containsExactlyInAnyOrder(AnnotatedPerson.class, PersistablePerson.class, Person.class, Address.class);
+		Assertions.assertThat(types).containsExactlyInAnyOrder(AnnotatedPerson.class, PersistablePerson.class, Person.class, Address.class, Email.class);
 	}
 }

@@ -21,11 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.data.mapping.model.SimpleConfiguredTypes;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Christoph Strobl
@@ -38,7 +36,7 @@ public class PropertyInfo {
 	private final TypeInfo owner;
 
 	private Field field;
-	private GenericsInfo genericsInfo;
+	private TypeSignature signature;
 	private Set<AnnotationModel> annotations;
 
 	private Method getter;
@@ -67,14 +65,14 @@ public class PropertyInfo {
 		return this;
 	}
 
-	public GenericsInfo getGenericsInfo() {
-		return genericsInfo;
+	public TypeSignature getTypeSignature() {
+		return signature;
 	}
 
 	public void setField(Field field) {
 
 		this.field = field;
-		genericsInfo = new GenericsInfo(ResolvableType.forField(field));
+		signature = TypeSignature.fromField(field);
 	}
 
 	public String getOwnerTypeName() {
@@ -181,10 +179,6 @@ public class PropertyInfo {
 
 	public void annotations(Set<AnnotationModel> annotations) {
 		this.annotations = annotations;
-	}
-
-	String getTypeSignature() {
-		return genericsInfo != null ? genericsInfo.getSignature() : getType().getCanonicalName();
 	}
 
 	@Override

@@ -23,12 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.data.DataModelFileWriter.JavaFileBuilder;
 import org.springframework.data.DataModelGeneratorUnitTests.InterfaceType;
 import org.springframework.data.mapping.model.ConfigurableTypeInformation;
 import org.springframework.data.mapping.model.Field;
 import org.springframework.data.mapping.model.ListTypeInformation;
-import org.springframework.data.mapping.model.SimpleConfiguredTypes;
 
 /**
  * @author Christoph Strobl
@@ -93,19 +91,6 @@ public class DataModelFileWriterUnitTest {
 		assertThat(init).isEqualTo("org.springframework.data.mapping.model.ListTypeInformation.listOf(org.springframework.data.mapping.model.ListTypeInformation.listOf(org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class)))");
 	}
 
-	@Test
-	void simpleFieldString() {
-
-		TypeInfo owner = new TypeInfo(JustSimpleTypes.class);
-		PropertyInfo propertyInfo = new PropertyInfo(owner, "stringValue", String.class);
-
-
-		JavaFileBuilder fileBuilder = new JavaFileBuilder(owner);
-		List<String> statement = new DataModelFileWriter(Collections.singleton(owner)).computeFieldStatement(propertyInfo, fileBuilder);
-		statement.forEach(System.out::println);
-
-//		assertThat(statement).isEqualTo("$T.<org.springframework.data.DataModelFileWriterUnitTest.JustSimpleTypes,java.lang.String>type(\"stringValue\",org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class))");
-	}
 
 	private String typeInitString(Class<?> owner, String property, Class<?> propertyType) {
 
@@ -128,12 +113,11 @@ public class DataModelFileWriterUnitTest {
 		JustSimpleTypesInfo() {
 			super(JustSimpleTypes.class);
 
-			org.springframework.data.mapping.model.Field<org.springframework.data.DataModelFileWriterUnitTest.JustSimpleTypes,java.lang.String> stringValue = org.springframework.data.mapping.model.Field.type("stringValue",org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class));
+			org.springframework.data.mapping.model.Field<org.springframework.data.DataModelFileWriterUnitTest.JustSimpleTypes, java.lang.String> stringValue = org.springframework.data.mapping.model.Field.type("stringValue", org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class));
 			addField(stringValue);
 
 			Field<ListTypes, List<?>> withWildcard = Field.type("", ListTypeInformation.list());
 			withWildcard.setter(ListTypes::setListOfWildcard);
-
 		}
 	}
 
