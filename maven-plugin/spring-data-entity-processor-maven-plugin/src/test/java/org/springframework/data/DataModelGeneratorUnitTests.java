@@ -26,17 +26,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.entity.processor.model.PropertyInfo;
+import org.springframework.data.entity.processor.model.TypeInfo;
+import org.springframework.data.entity.processor.writer.DataModelGenerator;
 import org.springframework.data.example.repo.Person;
 import org.springframework.data.mapping.model.ConfigurableTypeInformation;
 import org.springframework.data.mapping.model.Field;
 import org.springframework.data.mapping.model.ListTypeInformation;
 import org.springframework.data.mapping.model.MapTypeInformation;
 import org.springframework.data.mapping.model.SimpleConfiguredTypes;
-import org.springframework.data.util.ClassTypeInformation;
 
 /**
  * @author Christoph Strobl
@@ -94,12 +95,12 @@ public class DataModelGeneratorUnitTests {
 //		assertThat(model.isPresent());
 //		return model.get();
 //	}
-
-	private static void isSimpleType(Optional<PropertyInfo> it) {
-
-		it.isPresent();
-		assertThat(it.get().isSimpleType()).isTrue();
-	}
+//
+//	private static void isSimpleType(Optional<PropertyInfo> it) {
+//
+//		it.isPresent();
+//		assertThat(it.get().isSimpleType()).isTrue();
+//	}
 
 	static class JustSimpleTupesInfo extends ConfigurableTypeInformation<JustSimpleTypes> {
 

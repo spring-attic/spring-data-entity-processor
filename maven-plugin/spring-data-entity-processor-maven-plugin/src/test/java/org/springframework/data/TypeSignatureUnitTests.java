@@ -23,6 +23,7 @@ import org.springframework.data.Types.DomainType;
 import org.springframework.data.Types.ListTypes;
 import org.springframework.data.Types.MapTypes;
 import org.springframework.data.Types.SingleTypes;
+import org.springframework.data.entity.processor.model.TypeSignature;
 
 /**
  * @author Christoph Strobl

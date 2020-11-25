@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data;
+package org.springframework.data.entity.processor.writer;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -25,6 +25,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.entity.processor.model.AnnotationInfo;
+import org.springframework.data.entity.processor.model.ConstructorInfo;
+import org.springframework.data.entity.processor.model.PropertyInfo;
+import org.springframework.data.entity.processor.model.TypeInfo;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.data.util.TypeInformation;
@@ -38,14 +42,12 @@ import org.springframework.util.ReflectionUtils;
 public class DataModelGenerator {
 
 	private final Set<Class<?>> domainTypes;
-	private final Set<Class<?>> processed;
 
 	private final Set<TypeInfo> typeInfos;
 
 	public DataModelGenerator(Set<Class<?>> domainTypes) {
 
 		this.domainTypes = domainTypes;
-		this.processed = new LinkedHashSet<>();
 		this.typeInfos = new LinkedHashSet<>();
 	}
 
@@ -54,7 +56,7 @@ public class DataModelGenerator {
 	}
 
 
-	Set<TypeInfo> process() {
+	public Set<TypeInfo> process() {
 
 		for (Class<?> domainType : domainTypes) {
 			computeTypeModel(domainType);
@@ -63,7 +65,7 @@ public class DataModelGenerator {
 		return typeInfos;
 	}
 
-	TypeInfo computeTypeModel(Class<?> domainType) {
+	public TypeInfo computeTypeModel(Class<?> domainType) {
 
 		{
 			Optional<TypeInfo> typeModel = typeModelFor(domainType);
@@ -77,7 +79,7 @@ public class DataModelGenerator {
 
 		typeInfo.setConstructor(new ConstructorInfo(domainType));
 		computeAndAddPropertyModels(typeInfo);
-		Set<AnnotationModel> annotations = computeAnnotation(domainType);
+		Set<AnnotationInfo> annotations = computeAnnotation(domainType);
 		typeInfo.annotations(annotations);
 
 		return typeInfo;
@@ -152,7 +154,7 @@ public class DataModelGenerator {
 
 		if (property.isFieldBacked()) {
 
-			Set<AnnotationModel> annotations = computeAnnotation(property.getField().get());
+			Set<AnnotationInfo> annotations = computeAnnotation(property.getField().get());
 			propertyInfo.annotations(annotations);
 
 			propertyInfo.setField(property.getField().get());
@@ -161,15 +163,15 @@ public class DataModelGenerator {
 		owner.addProperty(propertyInfo);
 	}
 
-	private Set<AnnotationModel> computeAnnotation(AnnotatedElement element) {
+	private Set<AnnotationInfo> computeAnnotation(AnnotatedElement element) {
 
 		if (ObjectUtils.isEmpty(element.getAnnotations())) {
 			return Collections.emptySet();
 		}
 
-		Set<AnnotationModel> annotations = new LinkedHashSet<>();
+		Set<AnnotationInfo> annotations = new LinkedHashSet<>();
 		for (Annotation annotation : element.getAnnotations()) {
-			annotations.add(new AnnotationModel(element, annotation.annotationType()));
+			annotations.add(new AnnotationInfo(element, annotation.annotationType()));
 		}
 		return annotations;
 	}

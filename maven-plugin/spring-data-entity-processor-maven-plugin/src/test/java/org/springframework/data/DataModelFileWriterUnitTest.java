@@ -24,6 +24,9 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.DataModelGeneratorUnitTests.InterfaceType;
+import org.springframework.data.entity.processor.model.PropertyInfo;
+import org.springframework.data.entity.processor.model.TypeInfo;
+import org.springframework.data.entity.processor.writer.DataModelFileWriter;
 import org.springframework.data.mapping.model.ConfigurableTypeInformation;
 import org.springframework.data.mapping.model.Field;
 import org.springframework.data.mapping.model.ListTypeInformation;

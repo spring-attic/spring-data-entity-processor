@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.entity.processor.PersistableEntityScanner;
 import org.springframework.data.example.annotated.AnnotatedPerson;
 import org.springframework.data.example.persitable.PersistablePerson;
 import org.springframework.data.example.repo.Address;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data;
+package org.springframework.data.entity.processor.model;
 
 import java.lang.reflect.Parameter;
 import java.util.Iterator;
@@ -32,7 +32,7 @@ import org.springframework.data.mapping.model.PreferredConstructorDiscoverer;
 public class TypeInfo implements Iterable<PropertyInfo> {
 
 	private final Class<?> type;
-	private final Set<AnnotationModel> annotations;
+	private final Set<AnnotationInfo> annotations;
 	private final Set<PropertyInfo> properties;
 	private ConstructorInfo constructor;
 
@@ -49,11 +49,11 @@ public class TypeInfo implements Iterable<PropertyInfo> {
 		return constructor != null ? constructor.getParameters() : Collections.emptyList();
 	}
 
-	public Set<AnnotationModel> getAnnotations() {
+	public Set<AnnotationInfo> getAnnotations() {
 		return annotations;
 	}
 
-	public TypeInfo annotations(Set<AnnotationModel> annotations) {
+	public TypeInfo annotations(Set<AnnotationInfo> annotations) {
 		this.annotations.addAll(annotations);
 		return this;
 	}
@@ -62,17 +62,17 @@ public class TypeInfo implements Iterable<PropertyInfo> {
 		this.constructor = constructor;
 	}
 
-	TypeInfo addProperty(PropertyInfo propertyInfo) {
+	public TypeInfo addProperty(PropertyInfo propertyInfo) {
 
 		this.properties.add(propertyInfo);
 		return this;
 	}
 
-	Class<?> getType() {
+	public Class<?> getType() {
 		return type;
 	}
 
-	String getTypeName() {
+	public String getTypeName() {
 		return type.getName();
 	}
 

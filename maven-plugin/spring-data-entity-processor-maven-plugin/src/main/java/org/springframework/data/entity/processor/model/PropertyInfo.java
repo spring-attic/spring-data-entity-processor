@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data;
+package org.springframework.data.entity.processor.model;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -37,7 +37,7 @@ public class PropertyInfo {
 
 	private Field field;
 	private TypeSignature signature;
-	private Set<AnnotationModel> annotations;
+	private Set<AnnotationInfo> annotations;
 
 	private Method getter;
 	private Method setter;
@@ -60,7 +60,7 @@ public class PropertyInfo {
 		this.isSimpleType = SimpleConfiguredTypes.isKownSimpleConfiguredType(type);
 	}
 
-	PropertyInfo simpleType() {
+	public PropertyInfo simpleType() {
 		this.isSimpleType = true;
 		return this;
 	}
@@ -79,10 +79,6 @@ public class PropertyInfo {
 		return getOwner().getType().getCanonicalName();
 	}
 
-	public Class<?> getOwnerType() {
-		return getOwner().getType();
-	}
-
 	public TypeInfo getOwner() {
 		return owner;
 	}
@@ -93,18 +89,6 @@ public class PropertyInfo {
 
 	public Class<?> getType() {
 		return type;
-	}
-
-	public boolean isSimpleType() {
-		return isSimpleType;
-	}
-
-	public boolean isListType() {
-		return isListType;
-	}
-
-	public boolean isMapType() {
-		return isMapType;
 	}
 
 	public PropertyInfo getter(Method method) {
@@ -137,47 +121,47 @@ public class PropertyInfo {
 		return wither;
 	}
 
-	boolean hasGetter() {
+	public boolean hasGetter() {
 		return getter != null;
 	}
 
-	boolean hasSetter() {
+	public boolean hasSetter() {
 		return setter != null;
 	}
 
-	boolean hasWither() {
+	public boolean hasWither() {
 		return wither != null;
 	}
 
-	ListPropertyInfo listOf(Class<?> type) {
+	public ListPropertyInfo listOf(Class<?> type) {
 		return new ListPropertyInfo(this).listValueType(type);
 	}
 
-	ListPropertyInfo listOf(TypeInfo model) {
+	public ListPropertyInfo listOf(TypeInfo model) {
 		return new ListPropertyInfo(this).listValueType(model);
 	}
 
-	MapPropertyInfo mapOf(TypeInfo key, TypeInfo value) {
+	public MapPropertyInfo mapOf(TypeInfo key, TypeInfo value) {
 		return new MapPropertyInfo(this).mapKeyType(key).mapValueType(value);
 	}
 
-	MapPropertyInfo mapOf(Class<?> key, TypeInfo value) {
+	public MapPropertyInfo mapOf(Class<?> key, TypeInfo value) {
 		return new MapPropertyInfo(this).mapKeyType(key).mapValueType(value);
 	}
 
-	MapPropertyInfo mapOf(TypeInfo key, Class<?> value) {
+	public MapPropertyInfo mapOf(TypeInfo key, Class<?> value) {
 		return new MapPropertyInfo(this).mapKeyType(key).mapValueType(value);
 	}
 
-	MapPropertyInfo mapOf(Class<?> key, Class<?> value) {
+	public MapPropertyInfo mapOf(Class<?> key, Class<?> value) {
 		return new MapPropertyInfo(this).mapKeyType(key).mapValueType(value);
 	}
 
-	DomainTypePropertyInfo domainType(TypeInfo typeInfo) {
+	public DomainTypePropertyInfo domainType(TypeInfo typeInfo) {
 		return new DomainTypePropertyInfo(this).type(typeInfo);
 	}
 
-	public void annotations(Set<AnnotationModel> annotations) {
+	public void annotations(Set<AnnotationInfo> annotations) {
 		this.annotations = annotations;
 	}
 
@@ -189,7 +173,7 @@ public class PropertyInfo {
 				'}';
 	}
 
-	public Set<AnnotationModel> getAnnotations() {
+	public Set<AnnotationInfo> getAnnotations() {
 		return this.annotations;
 	}
 
@@ -213,11 +197,6 @@ public class PropertyInfo {
 			listValueType(model.getType());
 			this.listValueTypeInfo = model;
 			return this;
-		}
-
-		@Override
-		public boolean isListType() {
-			return true;
 		}
 
 		@Override
@@ -261,21 +240,6 @@ public class PropertyInfo {
 					"typeModel=" + typeInfo +
 					'}';
 		}
-
-		@Override
-		public boolean isSimpleType() {
-			return false;
-		}
-
-		@Override
-		public boolean isListType() {
-			return false;
-		}
-
-		@Override
-		public boolean isMapType() {
-			return false;
-		}
 	}
 
 	static class MapPropertyInfo extends PropertyInfo {
@@ -313,29 +277,6 @@ public class PropertyInfo {
 			this.mapValueType = model.getType();
 			this.mapValueTypeInfo = model;
 			return this;
-		}
-
-		public Class<?> getMapKeyType() {
-			return mapKeyType;
-		}
-
-		public Class<?> getMapValueType() {
-			return mapValueType;
-		}
-
-		@Override
-		public boolean isListType() {
-			return false;
-		}
-
-		@Override
-		public boolean isMapType() {
-			return true;
-		}
-
-		@Override
-		public boolean isSimpleType() {
-			return false;
 		}
 
 		@Override

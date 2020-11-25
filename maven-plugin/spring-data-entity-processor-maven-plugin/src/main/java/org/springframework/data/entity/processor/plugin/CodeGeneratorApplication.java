@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data;
+package org.springframework.data.entity.processor.plugin;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
+
+import org.springframework.data.entity.processor.PersistableEntityScanner;
+import org.springframework.data.entity.processor.writer.DataModelFileWriter;
+import org.springframework.data.entity.processor.writer.DataModelGenerator;
 
 /**
  * @author Christoph Strobl

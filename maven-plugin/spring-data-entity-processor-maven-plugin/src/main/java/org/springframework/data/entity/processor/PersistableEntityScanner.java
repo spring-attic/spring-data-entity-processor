@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data;
+package org.springframework.data.entity.processor;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;

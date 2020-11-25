@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data;
+package org.springframework.data.entity.processor.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ public class ConstructorInfo {
 		return model;
 	}
 
-	boolean isNoArgConstructor() {
+	public boolean isNoArgConstructor() {
 		return parameterList.isEmpty();
 	}
 

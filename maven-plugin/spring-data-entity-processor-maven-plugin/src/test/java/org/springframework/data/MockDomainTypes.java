@@ -18,6 +18,9 @@ package org.springframework.data;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.springframework.data.entity.processor.model.DomainTypes;
+import org.springframework.data.entity.processor.model.TypeInfo;
+
 /**
  * @author Christoph Strobl
  * @since 2020/11

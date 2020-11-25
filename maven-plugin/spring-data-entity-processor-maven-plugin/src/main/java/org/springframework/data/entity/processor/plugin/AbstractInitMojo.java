@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data;
+package org.springframework.data.entity.processor.plugin;
 
 import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
 
@@ -50,7 +50,7 @@ public abstract class AbstractInitMojo extends AbstractMojo {
 
 	private static final String SPRING_BOOT_APPLICATION_CLASS_NAME = "org.springframework.boot.SpringBootConfiguration";
 
-	private static final String TOOLS_APPLICATION_CLASS_NAME = "org.springframework.data.CodeGeneratorApplication";
+	private static final String TOOLS_APPLICATION_CLASS_NAME = "org.springframework.data.entity.processor.plugin.CodeGeneratorApplication";
 
 	/**
 	 * The Maven project.

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data;
+package org.springframework.data.entity.processor.model;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -28,13 +28,13 @@ import org.springframework.util.ReflectionUtils;
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class AnnotationModel {
+public class AnnotationInfo {
 
 	private final AnnotatedElement element;
 	private final Class<? extends Annotation> annotation;
 	private Map<String, Object> arguments;
 
-	public AnnotationModel(AnnotatedElement element, Class<? extends Annotation> annotation) {
+	public AnnotationInfo(AnnotatedElement element, Class<? extends Annotation> annotation) {
 
 		this.element = element;
 		this.annotation = annotation;
