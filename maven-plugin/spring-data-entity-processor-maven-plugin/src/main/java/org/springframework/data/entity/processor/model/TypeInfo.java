@@ -16,6 +16,7 @@
 package org.springframework.data.entity.processor.model;
 
 import java.lang.reflect.Parameter;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -32,6 +33,8 @@ import org.springframework.data.mapping.model.PreferredConstructorDiscoverer;
 public class TypeInfo implements Iterable<PropertyInfo> {
 
 	private final Class<?> type;
+	private final TypeSignature signature;
+
 	private final Set<AnnotationInfo> annotations;
 	private final Set<PropertyInfo> properties;
 	private ConstructorInfo constructor;
@@ -39,6 +42,7 @@ public class TypeInfo implements Iterable<PropertyInfo> {
 	public TypeInfo(Class<?> type) {
 
 		this.type = type;
+		this.signature = TypeSignature.fromClass(type);
 		this.annotations = new LinkedHashSet<>();
 		this.properties = new LinkedHashSet<>();
 	}
@@ -76,6 +80,9 @@ public class TypeInfo implements Iterable<PropertyInfo> {
 		return type.getName();
 	}
 
+	public TypeSignature getSignature() {
+		return signature;
+	}
 
 	public ConstructorInfo getConstructor() {
 		return constructor;
@@ -93,6 +100,9 @@ public class TypeInfo implements Iterable<PropertyInfo> {
 
 	@Override
 	public Iterator<PropertyInfo> iterator() {
-		return this.properties.iterator();
+
+		return properties.stream()
+				.sorted(Comparator.comparing(PropertyInfo::getName))
+				.iterator();
 	}
 }

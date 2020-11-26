@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -32,19 +33,51 @@ import org.springframework.util.StringUtils;
  */
 public class TypeSignature {
 
-	private final ResolvableType resolvableType;
+	private static final String TYPE_POSTFIX = "ConfigurableTypeInformation";
 
-	public TypeSignature(ResolvableType resolvableType) {
+	private final ResolvableType resolvableType;
+	private final @Nullable Field field;
+
+	public TypeSignature(ResolvableType resolvableType, @Nullable Field field) {
 
 		this.resolvableType = resolvableType;
+		this.field = field;
 	}
 
 	public static TypeSignature fromField(Field field) {
-		return new TypeSignature(ResolvableType.forField(field));
+		return new TypeSignature(ResolvableType.forField(field), field);
+	}
+
+	public static TypeSignature fromClass(Class<?> type) {
+		return new TypeSignature(ResolvableType.forClass(type), null);
 	}
 
 	public static TypeSignature from(Class<?> owner, String field) {
 		return fromField(ReflectionUtils.findField(owner, field));
+	}
+
+	public String getPackageName() {
+		return resolvableType.resolve().getPackage().getName();
+	}
+
+	public String getSimpleName() {
+		return resolvableType.resolve().getSimpleName();
+	}
+
+	public String getCanonicalConfigurableTypeName() {
+		return resolvableType.resolve().getCanonicalName() + TYPE_POSTFIX;
+	}
+
+	public String getCanonicalSuperConfigurableTypeName() {
+
+		if(resolvableType.resolve().getSuperclass() != null) {
+			return resolvableType.resolve().getSuperclass().getCanonicalName() + TYPE_POSTFIX;
+		}
+		return null;
+	}
+
+	public String getSimpleConfigurableTypeName() {
+		return getSimpleName() + TYPE_POSTFIX;
 	}
 
 	public String getJavaSignatureString() {
@@ -85,8 +118,8 @@ public class TypeSignature {
 
 	String initSignatureFrom(ResolvableType type, DomainTypes domainTypes) {
 
-		if (domainTypes.containsDomainTypeModelForClass(type.resolve())) {
-			return type.resolve().getCanonicalName() + "ConfigurableTypeInformation.instance()";
+		if (domainTypes.containsDomainTypeModelForClass(type.resolve()) || field == null) {
+			return type.resolve().getCanonicalName() + TYPE_POSTFIX + ".instance()";
 		}
 
 		if (type.isArray()) {

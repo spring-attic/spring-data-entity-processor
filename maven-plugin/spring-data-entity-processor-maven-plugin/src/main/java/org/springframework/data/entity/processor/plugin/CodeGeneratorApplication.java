@@ -21,8 +21,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.springframework.data.entity.processor.PersistableEntityScanner;
+import org.springframework.data.entity.processor.model.DomainTypes;
 import org.springframework.data.entity.processor.writer.DataModelFileWriter;
 import org.springframework.data.entity.processor.writer.DataModelGenerator;
+import org.springframework.data.entity.processor.writer.JavaPoetFileWriter;
 
 /**
  * @author Christoph Strobl
@@ -50,10 +52,21 @@ public class CodeGeneratorApplication {
 		List<Class<?>> types = scanner.scan(packageName);
 
 		DataModelGenerator modelGenerator = new DataModelGenerator(new LinkedHashSet<>(types));
+
+		DomainTypes domainTypes = new DomainTypes(modelGenerator.process());
+
+		JavaPoetFileWriter javaPoetFileWriter = new JavaPoetFileWriter();
+		try {
+			javaPoetFileWriter.writeConfigurableTypes(domainTypes, outputDirectory);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
 		DataModelFileWriter fileWriter = new DataModelFileWriter(modelGenerator.process());
 		fileWriter.processFiles();
 		try {
-			fileWriter.writeTo(outputDirectory);
+//			fileWriter.writeTo(outputDirectory);
 			fileWriter.writeSubstitution(outputDirectory);
 		} catch (IOException e) {
 			e.printStackTrace();

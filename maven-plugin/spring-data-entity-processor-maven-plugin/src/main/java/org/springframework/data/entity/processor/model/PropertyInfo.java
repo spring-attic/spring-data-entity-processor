@@ -173,6 +173,10 @@ public class PropertyInfo {
 				'}';
 	}
 
+	public boolean hasAccessorMethods() {
+		return hasGetter() || hasSetter() || hasWither();
+	}
+
 	public Set<AnnotationInfo> getAnnotations() {
 		return this.annotations;
 	}

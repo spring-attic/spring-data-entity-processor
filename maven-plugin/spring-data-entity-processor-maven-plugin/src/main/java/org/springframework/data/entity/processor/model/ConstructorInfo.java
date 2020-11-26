@@ -62,6 +62,10 @@ public class ConstructorInfo {
 		return parameterList.isEmpty();
 	}
 
+	public Class<?> getType() {
+		return type;
+	}
+
 	@Override
 	public String toString() {
 		return "ConstructorModel{" +

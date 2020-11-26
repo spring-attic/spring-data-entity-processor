@@ -15,18 +15,23 @@
  */
 package org.springframework.data.example.repo;
 
+import java.lang.annotation.Annotation;
+
+import org.springframework.data.mapping.model.ConfigurableTypeConstructor;
 import org.springframework.data.mapping.model.ConfigurableTypeInformation;
+import org.springframework.data.mapping.model.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 /**
  * @author Christoph Strobl
  * @since 2020/11
  */
 public final class PersonConfigurableTypeXInformation extends ConfigurableTypeInformation<Person> {
+
 	private static final PersonConfigurableTypeXInformation INSTANCE = new PersonConfigurableTypeXInformation();
 
 	public PersonConfigurableTypeXInformation() {
 		super(org.springframework.data.example.repo.Person.class);
-
 
 	}
 

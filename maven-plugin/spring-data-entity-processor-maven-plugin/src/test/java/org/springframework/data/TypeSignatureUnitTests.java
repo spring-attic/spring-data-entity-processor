@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.Types.ArrayTypes;
 import org.springframework.data.Types.DomainType;
+import org.springframework.data.Types.DomainTypeWithGenericSignature;
 import org.springframework.data.Types.ListTypes;
 import org.springframework.data.Types.MapTypes;
 import org.springframework.data.Types.SingleTypes;
@@ -253,5 +254,16 @@ public class TypeSignatureUnitTests {
 
 		assertThat(signature.getJavaSignatureString()).isEqualTo("java.util.Map<java.lang.String,java.util.Map<java.lang.String,java.lang.String>>");
 		assertThat(signature.getConfigurableTypeSignatureString()).isEqualTo("org.springframework.data.mapping.model.MapTypeInformation.mapOf(org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class),org.springframework.data.mapping.model.MapTypeInformation.mapOf(org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class),org.springframework.data.mapping.model.SimpleConfiguredTypes.get(java.lang.String.class)))");
+	}
+
+	// Custom Generic Types
+
+	@Test
+	void computeSignatureForDomainType() {
+
+		TypeSignature signature = TypeSignature.fromClass(DomainTypeWithGenericSignature.class);
+
+		assertThat(signature.getJavaSignatureString()).isEqualTo("org.springframework.data.Types.DomainTypeWithGenericSignature<?,?,?>");
+		assertThat(signature.getConfigurableTypeSignatureString()).isEqualTo("org.springframework.data.Types.DomainTypeWithGenericSignatureConfigurableTypeInformation.instance()");
 	}
 }

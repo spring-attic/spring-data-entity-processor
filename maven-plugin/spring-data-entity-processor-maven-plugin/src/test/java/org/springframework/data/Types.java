@@ -38,6 +38,13 @@ public interface Types {
 
 	}
 
+	class DomainTypeWithGenericSignature<T1, T2, T3> {
+
+		T1 t1Value;
+		T2 t2Value;
+		T3 t3Value;
+	}
+
 	class SingleTypes {
 
 		Object objectValue;
@@ -339,7 +346,7 @@ public interface Types {
 
 	class SingleCtor {
 
-		SingleCtor(String stringValue, Long longValue) {
+		public SingleCtor(String stringValue, Long longValue) {
 
 		}
 	}
