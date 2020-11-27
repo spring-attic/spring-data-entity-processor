@@ -17,6 +17,8 @@ package org.springframework.data;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Date;
 import java.util.List;
@@ -333,11 +335,36 @@ public interface Types {
 		Long longValueInAbstractTypeImplementation;
 	}
 
-	class LimitedAccess {
+	class AccessorMethodsType {
 
-		String noSetter;
-		String noGetter;
-		String withWither;
+		String justGetter;
+		String justSetter;
+		String getterAndWither;
+
+		public AccessorMethodsType() {
+		}
+
+		private AccessorMethodsType(String justGetter, String justSetter, String getterAndWither) {
+			this.justGetter = justGetter;
+			this.justSetter = justSetter;
+			this.getterAndWither = getterAndWither;
+		}
+
+		public String getJustGetter() {
+			return justGetter;
+		}
+
+		public String getGetterAndWither() {
+			return getterAndWither;
+		}
+
+		public void setJustSetter(String justSetter) {
+			this.justSetter = justSetter;
+		}
+
+		public AccessorMethodsType withGetterAndWither(String value) {
+			return new AccessorMethodsType(justGetter, justSetter, getterAndWither);
+		}
 	}
 
 	class NoArgsCtor {
@@ -384,7 +411,10 @@ public interface Types {
 	class FieldAnnotation {
 
 		@AnnotationType
-		String singleAnnotation;
+		String singleAnnotationWithDefaultValue;
+
+		@AnnotationType(att = "custom-value")
+		String singleAnnotationWith;
 
 		@AnnotationType
 		@AnnotationType
@@ -394,6 +424,11 @@ public interface Types {
 		String containerAnnotation;
 	}
 
+	@AnnotationType(att = "custom-value")
+	class ClassAnnotation {
+
+	}
+
 
 	interface InterfaceType {
 
@@ -401,6 +436,7 @@ public interface Types {
 
 
 	@Target({ElementType.TYPE, ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
 	@Repeatable(AnnotationContainer.class)
 	@interface AnnotationType {
 
@@ -408,6 +444,7 @@ public interface Types {
 	}
 
 	@Target({ElementType.TYPE, ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
 	@interface AnnotationContainer {
 
 		AnnotationType[] value() default {};

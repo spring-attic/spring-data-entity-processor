@@ -249,23 +249,40 @@ public class JavaPoetFileWriter implements ConfigurableTypeWriter {
 
 		Builder annotations = CodeBlock.builder();
 		for (AnnotationInfo annotation : propertyInfo.getAnnotations()) {
-			annotations.addStatement(annotationBlock(propertyInfo, annotation));
+			annotations.addStatement(fieldAnnotationBlock(propertyInfo, annotation));
 		}
 		return annotations.build();
 	}
 
-	CodeBlock annotationBlock(PropertyInfo propertyInfo, AnnotationInfo annotationInfo) {
+	CodeBlock fieldAnnotationBlock(PropertyInfo propertyInfo, AnnotationInfo annotationInfo) {
 
 		if (annotationInfo.matches(Id.class)) {
 			return CodeBlock.of("$L.annotatedWithAtId()", propertyInfo.getName());
 		}
 
+		return CodeBlock.builder()
+				.add("$L.annotation(", propertyInfo.getName())
+				.add(newAnnotationBlock(annotationInfo))
+				.add(")")
+				.build();
+	}
+
+	CodeBlock newAnnotationBlock(AnnotationInfo annotationInfo) {
+		return CodeBlock.builder()
+				.add("new $T() {", annotationInfo.getAnnotation())
+				.add(annotationValuesBlock(annotationInfo))
+				.add("}")
+				.build();
+	}
+
+	CodeBlock annotationValuesBlock(AnnotationInfo annotationInfo) {
+
 		Builder annotation = CodeBlock.builder();
 		annotation.add("public Class<? extends $T> annotationType() { return $T.class; }", Annotation.class, annotationInfo.getAnnotation());
 		for (Entry<String, Object> entry : annotationInfo.getArguments().entrySet()) {
 
+			Object value;
 			Method method = annotationInfo.getMethod(entry.getKey());
-			Object value = null;
 			if (BeanUtils.isSimpleProperty(entry.getValue().getClass())) {
 
 				if (entry.getValue() instanceof Enum) {
@@ -284,12 +301,6 @@ public class JavaPoetFileWriter implements ConfigurableTypeWriter {
 			annotation.add("public $T $L() { return $L; }", method.getReturnType(), entry.getKey(), value);
 		}
 
-		return CodeBlock.builder()
-				.add("$L.annotation(", propertyInfo.getName())
-				.add("new $T() {", annotationInfo.getAnnotation())
-				.add(annotation.build())
-				.add("}")
-				.add(")")
-				.build();
+		return annotation.build();
 	}
 }
