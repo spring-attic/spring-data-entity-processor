@@ -17,12 +17,10 @@ package org.springframework.data.entity.processor.plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.List;
 
 import org.springframework.data.entity.processor.PersistableEntityScanner;
+import org.springframework.data.entity.processor.model.DataModelGenerator;
 import org.springframework.data.entity.processor.model.DomainTypes;
-import org.springframework.data.entity.processor.writer.DataModelGenerator;
 import org.springframework.data.entity.processor.writer.JavaPoetFileWriter;
 
 /**
@@ -45,14 +43,10 @@ public class CodeGeneratorApplication {
 
 	private static void scanProcessAndWriteFiles(String packageName, File outputDirectory) {
 
-		PersistableEntityScanner scanner = new PersistableEntityScanner();
-		List<Class<?>> types = scanner.scan(packageName);
-
-		DataModelGenerator modelGenerator = new DataModelGenerator(new LinkedHashSet<>(types));
-
-		DomainTypes domainTypes = new DomainTypes(modelGenerator.process());
+		DomainTypes domainTypes = new DataModelGenerator(new PersistableEntityScanner().scan(packageName)).getDomainTypes();
 
 		JavaPoetFileWriter javaPoetFileWriter = new JavaPoetFileWriter();
+
 		try {
 
 			javaPoetFileWriter.writeConfigurableTypes(domainTypes, outputDirectory);

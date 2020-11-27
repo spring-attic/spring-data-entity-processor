@@ -15,8 +15,6 @@
  */
 package org.springframework.data;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Target;
@@ -24,14 +22,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.data.entity.processor.model.PropertyInfo;
+import org.springframework.data.entity.processor.model.DomainTypes;
 import org.springframework.data.entity.processor.model.TypeInfo;
-import org.springframework.data.entity.processor.writer.DataModelGenerator;
+import org.springframework.data.entity.processor.model.DataModelGenerator;
 import org.springframework.data.example.repo.Person;
 import org.springframework.data.mapping.model.ConfigurableTypeInformation;
 import org.springframework.data.mapping.model.Field;
@@ -49,7 +46,7 @@ public class DataModelGeneratorUnitTests {
 	@Test
 	void xxx() {
 
-		Set<TypeInfo> models = new DataModelGenerator(Collections.singleton(Person.class)).process();
+		DomainTypes models = new DataModelGenerator(Collections.singleton(Person.class)).getDomainTypes();
 		models.forEach(System.out::println);
 	}
 

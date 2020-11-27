@@ -28,7 +28,6 @@ import java.util.Set;
  */
 public class DomainTypes implements Iterable<TypeInfo> {
 
-
 	private final Set<TypeInfo> domainTypes;
 
 	static DomainTypes empty() {

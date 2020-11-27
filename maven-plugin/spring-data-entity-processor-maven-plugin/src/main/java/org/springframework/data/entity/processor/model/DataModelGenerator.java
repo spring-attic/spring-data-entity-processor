@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data.entity.processor.writer;
+package org.springframework.data.entity.processor.model;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.entity.processor.model.AnnotationInfo;
-import org.springframework.data.entity.processor.model.ConstructorInfo;
-import org.springframework.data.entity.processor.model.PropertyInfo;
-import org.springframework.data.entity.processor.model.TypeInfo;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.data.util.TypeInformation;
@@ -45,10 +42,11 @@ public class DataModelGenerator {
 
 	private final Set<TypeInfo> typeInfos;
 
-	public DataModelGenerator(Set<Class<?>> domainTypes) {
+	public DataModelGenerator(Collection<Class<?>> domainTypes) {
 
-		this.domainTypes = domainTypes;
+		this.domainTypes = new LinkedHashSet<>(domainTypes);
 		this.typeInfos = new LinkedHashSet<>();
+		process();
 	}
 
 	public DataModelGenerator() {
@@ -56,13 +54,17 @@ public class DataModelGenerator {
 	}
 
 
-	public Set<TypeInfo> process() {
+	private Set<TypeInfo> process() {
 
 		for (Class<?> domainType : domainTypes) {
 			computeTypeModel(domainType);
 		}
 
 		return typeInfos;
+	}
+
+	public DomainTypes getDomainTypes() {
+		return new DomainTypes(typeInfos);
 	}
 
 	public TypeInfo computeTypeModel(Class<?> domainType) {

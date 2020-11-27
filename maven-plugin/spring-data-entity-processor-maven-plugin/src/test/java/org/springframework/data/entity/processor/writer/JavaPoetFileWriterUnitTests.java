@@ -28,6 +28,7 @@ import org.springframework.data.Types.AccessorMethodsType;
 import org.springframework.data.Types.AnnotationType;
 import org.springframework.data.entity.processor.model.AnnotationInfo;
 import org.springframework.data.entity.processor.model.ConstructorInfo;
+import org.springframework.data.entity.processor.model.DataModelGenerator;
 import org.springframework.data.entity.processor.model.DomainTypes;
 import org.springframework.data.entity.processor.model.PropertyInfo;
 import org.springframework.data.entity.processor.model.TypeInfo;
@@ -155,7 +156,7 @@ public class JavaPoetFileWriterUnitTests {
 	void writeToConsole() {
 
 		DataModelGenerator modelGenerator = new DataModelGenerator(Collections.singleton(Person.class));
-		DomainTypes domainTypes = new DomainTypes(modelGenerator.process());
+		DomainTypes domainTypes = modelGenerator.getDomainTypes();
 
 		JavaFile file = writer.typeInfoToConfigurableTypeInformation(domainTypes.iterator().next(), domainTypes);
 		System.out.println(file.toString());

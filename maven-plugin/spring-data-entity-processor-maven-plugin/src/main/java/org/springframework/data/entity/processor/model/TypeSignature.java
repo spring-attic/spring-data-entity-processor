@@ -70,7 +70,7 @@ public class TypeSignature {
 
 	public String getCanonicalSuperConfigurableTypeName() {
 
-		if(resolvableType.resolve().getSuperclass() != null) {
+		if (resolvableType.resolve().getSuperclass() != null) {
 			return resolvableType.resolve().getSuperclass().getCanonicalName() + TYPE_POSTFIX;
 		}
 		return null;

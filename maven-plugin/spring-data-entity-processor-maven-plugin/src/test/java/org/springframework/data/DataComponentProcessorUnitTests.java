@@ -20,7 +20,7 @@ import java.io.IOException;
 import edu.emory.mathcs.backport.java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.entity.processor.writer.DataModelFileWriter;
-import org.springframework.data.entity.processor.writer.DataModelGenerator;
+import org.springframework.data.entity.processor.model.DataModelGenerator;
 import org.springframework.data.example.repo.Person;
 
 /**
@@ -32,11 +32,11 @@ public class DataComponentProcessorUnitTests {
 	@Test
 	void x2() throws IOException {
 
-		DataModelGenerator modelGenerator = new DataModelGenerator(Collections.singleton(Person.class));
-
-		DataModelFileWriter fileWriter = new DataModelFileWriter(modelGenerator.process());
-		fileWriter.processFiles();
-		fileWriter.writeTo(null);
-		fileWriter.writeSubstitution(null);
+//		DataModelGenerator modelGenerator = new DataModelGenerator(Collections.singleton(Person.class));
+//
+//		DataModelFileWriter fileWriter = new DataModelFileWriter(modelGenerator.process());
+//		fileWriter.processFiles();
+//		fileWriter.writeTo(null);
+//		fileWriter.writeSubstitution(null);
 	}
 }
