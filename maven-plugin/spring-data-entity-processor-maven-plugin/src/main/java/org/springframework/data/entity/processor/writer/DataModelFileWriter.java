@@ -105,8 +105,6 @@ public class DataModelFileWriter {
 				.returns(ParameterizedTypeName.get(ClassName.get(ClassTypeInformation.class), TypeVariableName.get("S")))
 				.addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), TypeVariableName.get("S")), "type");
 
-		fromMethod.addStatement("System.out.println(\"hello from substitution!\")");
-
 		for (JavaFileBuilder fileBuilder : fileBuilders.values()) {
 
 			fromMethod.beginControlFlow("if(type == " + fileBuilder.typeInfo.getTypeName() + ".class)");

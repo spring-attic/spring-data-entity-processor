@@ -45,7 +45,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class PersistableEntityScanner {
 
-	Set<Class<?>> seen = new HashSet<>();
+	private final Set<Class<?>> seen = new HashSet<>();
 
 	public List<Class<?>> scan(String packageName) {
 
@@ -78,8 +78,6 @@ public class PersistableEntityScanner {
 						if (AnnotationUtils.findAnnotation(type, Persistent.class) != null || ClassUtils.isAssignable(Persistable.class, type)) {
 							domainTypes.addAll(collectTypes(type));
 						} else if (ClassUtils.isAssignable(Repository.class, type)) {
-
-							System.out.println("repo found: " + type);
 							domainTypes.addAll(collectTypesForRepositiory(type));
 						}
 					}

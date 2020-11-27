@@ -22,7 +22,6 @@ import java.util.Collections;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.Types;
 import org.springframework.data.Types.AccessorMethodsType;
@@ -158,7 +157,7 @@ public class JavaPoetFileWriterUnitTests {
 		DataModelGenerator modelGenerator = new DataModelGenerator(Collections.singleton(Person.class));
 		DomainTypes domainTypes = new DomainTypes(modelGenerator.process());
 
-		JavaFile file = writer.computeFile(domainTypes.iterator().next(), domainTypes);
+		JavaFile file = writer.typeInfoToConfigurableTypeInformation(domainTypes.iterator().next(), domainTypes);
 		System.out.println(file.toString());
 	}
 }

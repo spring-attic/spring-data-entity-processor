@@ -20,17 +20,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.*;
 import com.squareup.javapoet.CodeBlock.Builder;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.entity.processor.model.AnnotationInfo;
@@ -42,20 +37,21 @@ import org.springframework.data.entity.processor.model.TypeInfo;
 import org.springframework.data.mapping.model.ConfigurableTypeConstructor;
 import org.springframework.data.mapping.model.ConfigurableTypeInformation;
 import org.springframework.data.mapping.model.Field;
+import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.lang.Nullable;
 
 /**
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class JavaPoetFileWriter implements ConfigurableTypeWriter {
+public class JavaPoetFileWriter implements ConfigurableTypeWriter, GraalVmConfigurationWriter {
 
 	@Override
 	public void writeConfigurableTypes(DomainTypes domainTypes, @Nullable File targetDirectory) throws IOException {
 
 		for (TypeInfo typeInfo : domainTypes) {
 
-			JavaFile file = computeFile(typeInfo, domainTypes);
+			JavaFile file = typeInfoToConfigurableTypeInformation(typeInfo, domainTypes);
 			if (targetDirectory == null) {
 				System.out.println(file.toString());
 			} else {
@@ -64,7 +60,52 @@ public class JavaPoetFileWriter implements ConfigurableTypeWriter {
 		}
 	}
 
-	JavaFile computeFile(TypeInfo typeInfo, DomainTypes domainTypes) {
+	@Override
+	public void writeGraalVmConfiguration(DomainTypes domainTypes, File targetDirectory) throws IOException {
+
+		TypeName wildcard = WildcardTypeName.subtypeOf(Object.class);
+
+		ParameterizedTypeName mapKeyType = ParameterizedTypeName.get(ClassName.get(Class.class), wildcard);
+		ParameterizedTypeName mapValueType = ParameterizedTypeName.get(ClassName.get(ClassTypeInformation.class), wildcard);
+
+		ParameterizedTypeName cacheType = ParameterizedTypeName.get(ClassName.get(Map.class), mapKeyType, mapValueType);
+
+		MethodSpec.Builder fromMethod = MethodSpec.methodBuilder("from")
+				.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+				.addAnnotation(ClassName.get("com.oracle.svm.core.annotate", "Substitute"))
+				.addTypeVariable(TypeVariableName.get("S"))
+				.returns(ParameterizedTypeName.get(ClassName.get(ClassTypeInformation.class), TypeVariableName.get("S")))
+				.addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), TypeVariableName.get("S")), "type");
+
+		for (TypeInfo typeInfo : domainTypes) {
+
+			fromMethod.beginControlFlow("if(type == " + typeInfo.getType().getCanonicalName() + ".class)");
+			fromMethod.addStatement("return ($T<S>) " + typeInfo.getSignature().getCanonicalConfigurableTypeName() + ".instance()", org.springframework.data.util.ClassTypeInformation.class);
+			fromMethod.endControlFlow();
+		}
+
+		fromMethod.addStatement("return ($T<S>) cache.computeIfAbsent(type, $T::new)", org.springframework.data.util.ClassTypeInformation.class, org.springframework.data.util.ClassTypeInformation.class);
+
+		TypeSpec typeSpec = TypeSpec.classBuilder("Target_ClassTypeInformation")
+				.addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+				.addAnnotation(AnnotationSpec.builder(ClassName.get("com.oracle.svm.core.annotate", "TargetClass"))
+						.addMember("className", "$S", "org.springframework.data.util.ClassTypeInformation")
+						.addMember("onlyWith", "{ $T.class }", ClassName.get("org.springframework.graalvm.substitutions", "OnlyIfPresent"))
+						.build())
+				.addField(FieldSpec.builder(cacheType, "cache", Modifier.PRIVATE, Modifier.STATIC).addAnnotation(ClassName.get("com.oracle.svm.core.annotate", "Alias")).build())
+				.addMethod(fromMethod.build())
+				.build();
+
+		JavaFile file = JavaFile.builder("org.springframework.data.util", typeSpec).build();
+
+		if (targetDirectory == null) {
+			System.out.println(file.toString());
+		} else {
+			file.writeTo(targetDirectory);
+		}
+	}
+
+	JavaFile typeInfoToConfigurableTypeInformation(TypeInfo typeInfo, DomainTypes domainTypes) {
 
 		TypeSpec typeSpec = computeTypeSpec(typeInfo, domainTypes);
 		return JavaFile.builder(typeInfo.getSignature().getPackageName(), typeSpec).build();

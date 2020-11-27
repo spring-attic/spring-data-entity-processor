@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.springframework.data.entity.processor.PersistableEntityScanner;
 import org.springframework.data.entity.processor.model.DomainTypes;
-import org.springframework.data.entity.processor.writer.DataModelFileWriter;
 import org.springframework.data.entity.processor.writer.DataModelGenerator;
 import org.springframework.data.entity.processor.writer.JavaPoetFileWriter;
 
@@ -35,8 +34,6 @@ public class CodeGeneratorApplication {
 
 		String packageToScan = args[0];
 		String targetDir = args[1];
-
-		System.out.println("targetDir: " + targetDir);
 
 		File outputDirectory = new File(targetDir);
 		if (!outputDirectory.exists()) {
@@ -57,17 +54,9 @@ public class CodeGeneratorApplication {
 
 		JavaPoetFileWriter javaPoetFileWriter = new JavaPoetFileWriter();
 		try {
+
 			javaPoetFileWriter.writeConfigurableTypes(domainTypes, outputDirectory);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-
-		DataModelFileWriter fileWriter = new DataModelFileWriter(modelGenerator.process());
-		fileWriter.processFiles();
-		try {
-//			fileWriter.writeTo(outputDirectory);
-			fileWriter.writeSubstitution(outputDirectory);
+			javaPoetFileWriter.writeGraalVmConfiguration(domainTypes, outputDirectory);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
