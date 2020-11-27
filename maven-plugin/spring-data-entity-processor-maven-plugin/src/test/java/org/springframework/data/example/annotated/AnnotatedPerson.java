@@ -15,7 +15,8 @@
  */
 package org.springframework.data.example.annotated;
 
-import org.springframework.data.mongodb.core.mapping.Document;
+
+import org.springframework.data.example.annotations.Document;
 
 /**
  * @author Christoph Strobl

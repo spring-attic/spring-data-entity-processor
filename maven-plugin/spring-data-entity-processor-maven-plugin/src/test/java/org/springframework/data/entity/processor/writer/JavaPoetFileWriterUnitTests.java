@@ -136,26 +136,23 @@ public class JavaPoetFileWriterUnitTests {
 	@Test
 	void annotationOnField() {
 
-		TypeInfo typeInfo = new TypeInfo(Types.FieldAnnotation.class);
-		PropertyInfo propertyInfo = new PropertyInfo(typeInfo, "singleAnnotationWith", String.class);
 		AnnotationInfo annotationInfo = new AnnotationInfo(ReflectionUtils.findField(Types.FieldAnnotation.class, "singleAnnotationWith"), AnnotationType.class);
-		propertyInfo.annotations(Collections.singleton(annotationInfo));
 
-		CodeBlock codeBlock = writer.fieldAnnotationBlock(propertyInfo, annotationInfo);
+		CodeBlock codeBlock = writer.newAnnotationBlock(annotationInfo);
 
-		assertThat(codeBlock).isEqualTo(CodeBlock.of("singleAnnotationWith.annotation(" +
+		assertThat(codeBlock).isEqualTo(CodeBlock.of(
 				"new org.springframework.data.Types.AnnotationType() {" +
-				"public Class<? extends java.lang.annotation.Annotation> annotationType() {" +
-				" return org.springframework.data.Types.AnnotationType.class; " +
-				"}" +
-				"public java.lang.String att() {" +
-				" return \"custom-value\"; " +
-				"}" +
-				"})"));
+						"public Class<? extends java.lang.annotation.Annotation> annotationType() {" +
+						" return org.springframework.data.Types.AnnotationType.class; " +
+						"}" +
+						"public java.lang.String att() {" +
+						" return \"custom-value\"; " +
+						"}" +
+						"}"));
 	}
 
 	@Test
-	@Disabled
+//	@Disabled
 	void writeToConsole() {
 
 		DataModelGenerator modelGenerator = new DataModelGenerator(Collections.singleton(Person.class));

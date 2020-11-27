@@ -20,12 +20,14 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.example.annotations.Document;
+import org.springframework.data.example.annotations.Field;
 
 /**
  * @author Christoph Strobl
  * @since 2020/11
  */
+@Document(collection = "persons")
 public class Person {
 
 	private @Id String id;

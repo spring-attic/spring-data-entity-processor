@@ -13,23 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data.example.repo;
-
-import org.springframework.data.mapping.model.ConfigurableTypeInformation;
+package org.springframework.data.example.annotations;
 
 /**
  * @author Christoph Strobl
  * @since 2020/11
  */
-public final class PersonConfigurableTypeXInformation extends ConfigurableTypeInformation<Person> {
-
-	private static final PersonConfigurableTypeXInformation INSTANCE = new PersonConfigurableTypeXInformation();
-
-	public PersonConfigurableTypeXInformation() {
-		super(org.springframework.data.example.repo.Person.class);
-	}
-
-	public static PersonConfigurableTypeXInformation instance() {
-		return INSTANCE;
-	}
+public enum FieldTypeEnum {
+	STRING, INT, OBJECT
 }
+

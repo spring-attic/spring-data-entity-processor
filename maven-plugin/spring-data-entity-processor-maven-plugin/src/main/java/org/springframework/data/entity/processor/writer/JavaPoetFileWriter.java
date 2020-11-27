@@ -108,6 +108,15 @@ public class JavaPoetFileWriter implements ConfigurableTypeWriter {
 				constructorMethod.addCode("\n");
 			}
 
+			// ANNOTATIONS
+			{
+				constructorMethod.addComment("ANNOTATIONS");
+				for (AnnotationInfo annotation : typeInfo.getAnnotations()) {
+					constructorMethod.addStatement("addAnnotation($L)", newAnnotationBlock(annotation));
+				}
+				constructorMethod.addCode("\n");
+			}
+
 			// PERSISTENCE CONSTRUCTOR
 			{
 				constructorMethod.addComment("PERSISTENCE CONSTRUCTOR");
@@ -196,7 +205,7 @@ public class JavaPoetFileWriter implements ConfigurableTypeWriter {
 		if (propertyInfo.hasAccessorMethods()) {
 			builder.add(accessorMethodsBlock(propertyInfo));
 		}
-		builder.add(annotations(propertyInfo));
+		builder.add(fieldAnnotations(propertyInfo));
 		return builder.build();
 	}
 
@@ -245,7 +254,7 @@ public class JavaPoetFileWriter implements ConfigurableTypeWriter {
 				.build();
 	}
 
-	CodeBlock annotations(PropertyInfo propertyInfo) {
+	CodeBlock fieldAnnotations(PropertyInfo propertyInfo) {
 
 		Builder annotations = CodeBlock.builder();
 		for (AnnotationInfo annotation : propertyInfo.getAnnotations()) {
