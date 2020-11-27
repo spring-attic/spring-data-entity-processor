@@ -17,11 +17,7 @@ package org.springframework.data;
 
 import java.io.IOException;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.entity.processor.writer.DataModelFileWriter;
-import org.springframework.data.entity.processor.model.DataModelGenerator;
-import org.springframework.data.example.repo.Person;
 
 /**
  * @author Christoph Strobl

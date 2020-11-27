@@ -22,13 +22,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.entity.processor.model.DataModelGenerator;
 import org.springframework.data.entity.processor.model.DomainTypes;
 import org.springframework.data.entity.processor.model.TypeInfo;
-import org.springframework.data.entity.processor.model.DataModelGenerator;
 import org.springframework.data.example.repo.Person;
 import org.springframework.data.mapping.model.ConfigurableTypeInformation;
 import org.springframework.data.mapping.model.Field;
@@ -104,14 +103,10 @@ public class DataModelGeneratorUnitTests {
 		JustSimpleTupesInfo() {
 			super(JustSimpleTypes.class);
 
-			Field.<JustSimpleTypes,java.lang.String> type("stringValue", SimpleConfiguredTypes.get(java.lang.String.class))
+			Field.<JustSimpleTypes, java.lang.String>type("stringValue", SimpleConfiguredTypes.get(java.lang.String.class))
 					.setter(JustSimpleTypes::setStringValue)
 					.getter(JustSimpleTypes::getStringValue);
-
-
 		}
-
-
 	}
 
 	static class ListTypesInfo extends ConfigurableTypeInformation<ListTypes> {
@@ -119,21 +114,18 @@ public class DataModelGeneratorUnitTests {
 		ListTypesInfo() {
 			super(ListTypes.class);
 
-			Field.<ListTypes,List<String>> type("stringValue", ListTypeInformation.listOf(SimpleConfiguredTypes.get(String.class)))
+			Field.<ListTypes, List<String>>type("stringValue", ListTypeInformation.listOf(SimpleConfiguredTypes.get(String.class)))
 					.setter(ListTypes::setListOfString)
 					.getter(ListTypes::getListOfString);
 
-			Field.<ListTypes,List<List<String>>> type("listOfString", ListTypeInformation.listOf(ListTypeInformation.listOf(SimpleConfiguredTypes.get(String.class))))
+			Field.<ListTypes, List<List<String>>>type("listOfString", ListTypeInformation.listOf(ListTypeInformation.listOf(SimpleConfiguredTypes.get(String.class))))
 					.setter(ListTypes::setListOfListOfString)
 					.getter(ListTypes::getListOfListOfString);
 
-			Field.<ListTypes,List<List<String>>> type("listOfString", ListTypeInformation.listOf(ListTypeInformation.listOf(SimpleConfiguredTypes.get(String.class))))
+			Field.<ListTypes, List<List<String>>>type("listOfString", ListTypeInformation.listOf(ListTypeInformation.listOf(SimpleConfiguredTypes.get(String.class))))
 					.setter(ListTypes::setListOfListOfString)
 					.getter(ListTypes::getListOfListOfString);
-
 		}
-
-
 	}
 
 	static class JustSimpleTypes {
@@ -341,10 +333,7 @@ public class DataModelGeneratorUnitTests {
 			Field<ListTypes, List> rawList = Field.<ListTypes, Map>type("rawList", MapTypeInformation.map());
 			rawList.setter(ListTypes::setRawList);
 			addField(rawList);
-
 		}
-
-
 	}
 
 	static class CyclicType {
