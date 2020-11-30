@@ -15,6 +15,13 @@
  */
 package org.springframework.data.example.repo;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.geo.GeoResults;
+import org.springframework.data.geo.Point;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -23,4 +30,15 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface PersonRepository extends CrudRepository<Person, String> {
 
+	List<ListValueType> findByFirstname(String firstname);
+
+	Slice<SliceValueType> findByFirstname(String firstname, Pageable page);
+
+	Page<PageValueType> findByLastname(String lastname, Pageable page);
+
+	GeoResults<GeoResultValueType> findByAddressNear(Point point);
+
+	Long countAllBy();
+
+	List<String> findGroupedLastnameByFirstname(String firstname);
 }

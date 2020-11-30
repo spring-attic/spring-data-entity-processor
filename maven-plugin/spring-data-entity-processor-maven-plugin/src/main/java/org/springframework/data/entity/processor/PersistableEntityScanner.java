@@ -31,6 +31,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.annotation.Persistent;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.geo.GeoResults;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.AbstractRepositoryMetadata;
@@ -98,7 +99,11 @@ public class PersistableEntityScanner {
 		ReflectionUtils.doWithMethods(repositoryInterface, method -> {
 
 			TypeInformation<?> methodTypeInfo = metadata.getReturnType(method);
-			if (methodTypeInfo.isCollectionLike()) {
+			if (ClassUtils.isAssignable(GeoResults.class, methodTypeInfo.getType())) {
+				if (!seen.contains(methodTypeInfo.getComponentType().getType())) {
+					types.addAll(collectTypes(methodTypeInfo.getComponentType().getType()));
+				}
+			} else if (methodTypeInfo.isCollectionLike()) {
 				if (!seen.contains(methodTypeInfo.getComponentType().getType())) {
 					types.addAll(collectTypes(methodTypeInfo.getComponentType().getType()));
 				}
@@ -111,7 +116,8 @@ public class PersistableEntityScanner {
 				}
 			} else {
 				// TODO: generic signature???
-				if (ClassUtils.isPrimitiveOrWrapper(methodTypeInfo.getActualType().getType())) {
+				Class<?> type = methodTypeInfo.getActualType().getType();
+				if (ClassUtils.isPrimitiveOrWrapper(type) || type.getPackage().getName().startsWith("java.lang")) {
 					return;
 				}
 				if (!seen.contains(methodTypeInfo.getActualType().getType())) {

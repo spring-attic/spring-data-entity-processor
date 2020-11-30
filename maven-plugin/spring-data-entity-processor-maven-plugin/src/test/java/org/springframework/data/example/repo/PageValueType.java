@@ -13,23 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data.example.persitable;
-
-import org.springframework.data.domain.Persistable;
+package org.springframework.data.example.repo;
 
 /**
  * @author Christoph Strobl
  * @since 2020/11
  */
-public class PersistablePerson implements Persistable<String> {
+public class PageValueType {
 
-	@Override
-	public String getId() {
-		return null;
-	}
-
-	@Override
-	public boolean isNew() {
-		return false;
-	}
 }

@@ -15,16 +15,22 @@
  */
 package org.springframework.data;
 
-import java.util.List;
+import static org.assertj.core.api.Assertions.*;
 
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.entity.processor.PersistableEntityScanner;
 import org.springframework.data.example.annotated.AnnotatedPerson;
-import org.springframework.data.example.persitable.PersistablePerson;
+import org.springframework.data.example.cyclic.LineItem;
+import org.springframework.data.example.cyclic.Order;
+import org.springframework.data.example.persistable.PersistablePerson;
 import org.springframework.data.example.repo.Address;
 import org.springframework.data.example.repo.Email;
+import org.springframework.data.example.repo.GeoResultValueType;
+import org.springframework.data.example.repo.ListValueType;
+import org.springframework.data.example.repo.PageValueType;
 import org.springframework.data.example.repo.Person;
+import org.springframework.data.example.repo.SliceValueType;
 
 /**
  * @author Christoph Strobl
@@ -32,12 +38,45 @@ import org.springframework.data.example.repo.Person;
  */
 public class PersistableEntityScannerTests {
 
+	private PersistableEntityScanner scanner;
+
+	@BeforeEach
+	void setUp() {
+		scanner = new PersistableEntityScanner();
+	}
+
 	@Test
-	void scansBasePackageForTypes() {
+	void scansBasePackageForTypesUsedInRepositoryInterface() {
 
-		PersistableEntityScanner scanner = new PersistableEntityScanner();
-		List<Class<?>> types = scanner.scan("org.springframework.data.example");
+		assertThat(scanner.scan("org.springframework.data.example.repo"))
+				.containsExactlyInAnyOrder(Person.class, Address.class, Email.class, GeoResultValueType.class, PageValueType.class, ListValueType.class, SliceValueType.class);
+	}
 
-		Assertions.assertThat(types).containsExactlyInAnyOrder(AnnotatedPerson.class, PersistablePerson.class, Person.class, Address.class, Email.class);
+	@Test
+	void scansBasePackageForPersistentAnnotatedEntities() {
+
+		assertThat(scanner.scan("org.springframework.data.example.annotated"))
+				.containsExactlyInAnyOrder(AnnotatedPerson.class);
+	}
+
+	@Test
+	void scansBasePackageForEntitiesExtendingPersistable() {
+
+		assertThat(scanner.scan("org.springframework.data.example.persistable"))
+				.containsExactlyInAnyOrder(PersistablePerson.class);
+	}
+
+	@Test
+	void ignoresNotMatching() {
+
+		assertThat(scanner.scan("org.springframework.data.example.ignored"))
+				.isEmpty();
+	}
+
+	@Test
+	void handlesCyclesInDomainModel() {
+
+		assertThat(scanner.scan("org.springframework.data.example.cyclic"))
+				.containsExactlyInAnyOrder(Order.class, LineItem.class);
 	}
 }
